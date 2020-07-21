@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 
-namespace SerializerGenerator
+namespace Destr.Codegen
 {
     public class Generated : Attribute
     {

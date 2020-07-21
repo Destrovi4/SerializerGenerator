@@ -3,27 +3,27 @@ using System.IO;
 namespace SerializerGenerator
 {
     [Generated]
-    public class GeneratedSerialized : ISerializer<TestPacket>
+    public class GeneratedSerializedA : ISerializer<TestPacketA>
     {
-        public void Read(ref TestPacket value, BinaryReader reader)
+        public void Read(ref TestPacketA value, BinaryReader reader)
         {
             value.a = reader.ReadByte();
             value.b = reader.ReadInt16();
             value.c = reader.ReadInt32();
             value.d = reader.ReadInt64();
             value.e = reader.ReadSingle();
-            value.g = reader.ReadDouble();
-            value.h = reader.ReadBoolean();
+            value.f = reader.ReadDouble();
+            value.g = reader.ReadBoolean();
         }
-        public void Write(BinaryWriter writer, in TestPacket value)
+        public void Write(BinaryWriter writer, in TestPacketA value)
         {
             writer.Write(value.a);
             writer.Write(value.b);
             writer.Write(value.c);
             writer.Write(value.d);
             writer.Write(value.e);
+            writer.Write(value.f);
             writer.Write(value.g);
-            writer.Write(value.h);
         }
     }
 }
