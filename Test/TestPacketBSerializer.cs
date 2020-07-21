@@ -4,7 +4,7 @@ using SerializerGenerator;
 namespace SerializerGenerator.Test
 {
     [Generated]
-    public class GeneratedSerializedB : ISerializer<TestPacketB>
+    public class TestPacketBSerializer : ISerializer<TestPacketB>
     {
         private ISerializer<TestPacketA> _ser0TestPacketA = null;
         public void Read(ref TestPacketB value, BinaryReader reader)

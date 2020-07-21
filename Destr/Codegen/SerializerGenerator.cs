@@ -11,21 +11,24 @@ namespace Destr.Codegen
     {
         private const string Space = "    ";
 
-        private readonly Type _type;
-        private readonly Type _inter;
         private readonly Type _dataType;
+        private readonly string _namespace;
+        private readonly string _className;
 
         private readonly HashSet<Type> _usingTypes;
         private readonly Dictionary<Type, string> _serializerFieldByType;
 
-        public Generator(Type type, Type inter)
+        public Generator(Type type, Type dataType) : this(type.Namespace, RealTypeName(type), dataType)
         {
-            _type = type;
-            _inter = inter;
-            _dataType = _inter.GenericTypeArguments[0];
+        }
+
+        public Generator(string ns, string name, Type dataType)
+        {
+            _namespace = ns;
+            _className = name;
+            _dataType = dataType;
             _usingTypes = new HashSet<Type>();
 
-            _usingTypes.Add(_inter);
             _usingTypes.Add(_dataType);
             _usingTypes.Add(typeof(ISerializer<>));
 
@@ -62,13 +65,13 @@ namespace Destr.Codegen
                     namespaces.Add(usingType.Namespace);
 
             foreach (var usingNamespaces in namespaces)
-                if (usingNamespaces != _type.Namespace)
+                if (usingNamespaces != _namespace)
                     yield return $"using {usingNamespaces};";
 
-            bool hasNamespace = !string.IsNullOrWhiteSpace(_type.Namespace);
+            bool hasNamespace = !string.IsNullOrWhiteSpace(_namespace);
             if (hasNamespace)
             {
-                yield return $"namespace {_type.Namespace}";
+                yield return $"namespace {_namespace}";
                 yield return "{";
                 foreach (var line in GenerateClass(Space))
                     yield return line;
@@ -85,7 +88,7 @@ namespace Destr.Codegen
         private IEnumerable<string> GenerateClass(string offset)
         {
             yield return $"{offset}[{nameof(Generated)}]";
-            yield return $"{offset}public class {RealTypeName(_type)} : {RealTypeName(_inter)}";
+            yield return $"{offset}public class {_className} : {SimpleName(typeof(ISerializer<>))}<{RealTypeName(_dataType)}>";
             yield return $"{offset}{{";
             
             string interName = SimpleName(typeof(ISerializer<>));
@@ -170,7 +173,7 @@ namespace Destr.Codegen
             return type.FullName.Replace('`', '_').Replace('.', '_');
         }
 
-        private static string SimpleName(Type type)
+        public static string SimpleName(Type type)
         {
             var name = type.Name;
             if (!type.IsGenericType) return name;
