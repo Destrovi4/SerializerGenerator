@@ -9,10 +9,10 @@ namespace SerializerGenerator.Test
     {
         public const string Definition = "Byte:a,TestPacketB:b;Int32:test";
         private static readonly Dictionary<Type, uint> _packetIdByType = new Dictionary<Type, uint>();
-        private const uint _0ProtocolPacket0Id = 0;
+        private const ushort _0ProtocolPacket0Id = 0;
         private ISerializer<ProtocolPacket0> _0ProtocolPacket0Serializer = null;
         private PacketListener<TestProtocol,ProtocolPacket0> _0ProtocolPacket0Listener = null;
-        private const uint _1ProtocolPacket1Id = 1;
+        private const ushort _1ProtocolPacket1Id = 1;
         private ISerializer<ProtocolPacket1> _1ProtocolPacket1Serializer = null;
         private PacketListener<TestProtocol,ProtocolPacket1> _1ProtocolPacket1Listener = null;
         private Action<BinaryReader>[] _descriptorRead = new Action<BinaryReader>[2];
@@ -27,8 +27,10 @@ namespace SerializerGenerator.Test
         {
             _descriptorRead[_0ProtocolPacket0Id] = P0ProtocolPacket0Reader;
             _descriptorWrite[_0ProtocolPacket0Id] = (writer<ProtocolPacket0>)P0ProtocolPacket0Write;
+            _0ProtocolPacket0Serializer = Serializer.Get<ProtocolPacket0>();
             _descriptorRead[_1ProtocolPacket1Id] = P1ProtocolPacket1Reader;
             _descriptorWrite[_1ProtocolPacket1Id] = (writer<ProtocolPacket1>)P1ProtocolPacket1Write;
+            _1ProtocolPacket1Serializer = Serializer.Get<ProtocolPacket1>();
         }
         public override void Read(BinaryReader reader)
         {
@@ -60,6 +62,7 @@ namespace SerializerGenerator.Test
         }
         public void P0ProtocolPacket0Write(BinaryWriter writer, in ProtocolPacket0 packet)
         {
+            writer.Write(_0ProtocolPacket0Id);
             _0ProtocolPacket0Serializer.Write(writer, in packet);
         }
         private void P1ProtocolPacket1Reader(BinaryReader reader)
@@ -70,6 +73,7 @@ namespace SerializerGenerator.Test
         }
         public void P1ProtocolPacket1Write(BinaryWriter writer, in ProtocolPacket1 packet)
         {
+            writer.Write(_1ProtocolPacket1Id);
             _1ProtocolPacket1Serializer.Write(writer, in packet);
         }
     }

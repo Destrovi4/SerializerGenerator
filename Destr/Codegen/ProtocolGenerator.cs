@@ -87,7 +87,7 @@ namespace Destr.Codegen
                 string serializer = $"_{fieldIndex}{packageTypeName}Serializer";
                 string listener = $"_{fieldIndex}{packageTypeName}Listener";
 
-                Fields.Line.Add($"private const uint {id} = {fieldIndex};");
+                Fields.Line.Add($"private const ushort {id} = {fieldIndex};");
 
                 Fields.Line.Add($"private ").Add(typeof(ISerializer<>), packageType).Add($" {serializer} = null;");
                 Fields.Line.Add($"private ").Add(typeof(PacketListener<,>), type, packageType).Add($" {listener} = null;");
@@ -104,9 +104,11 @@ namespace Destr.Codegen
                 var writeMethod = AddMethod(writer).Public.Void;
                 writeMethod.AddArgument<BinaryWriter>("writer");
                 writeMethod.Argument.In.Add(packageType).Add("packet");
+                writeMethod.Line.Add($"writer.Write({id});");
                 writeMethod.Line.Add($"{serializer}.Write(writer, in packet);");
 
                 listenSwitch.AddCase(id).Break.Line.Add($"{listener} = (PacketListener<{Name}, ").Add(packageType).Add(">)(object)listener;");
+                constructor.Line.Add($"{serializer} = Serializer.Get<").Add(packageType).Add(">();");
 
                 fieldIndex++;
             }
