@@ -1,16 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace Destr.Codegen.Source
 {
-    public class SwitchSourceGenerator : SourceGenerator
+    public class SwitchSourceGenerator : BlockGenerator
     {
         public readonly LineSourceGenerator Header = new LineSourceGenerator();
 
         public SwitchSourceGenerator()
         {
             Require(Header.Dependence);
+            isBordered = true;
         }
 
         public CaseSourceGenerator AddCase()
@@ -32,10 +34,8 @@ namespace Destr.Codegen.Source
         public override IEnumerable<string> GetSourceLines()
         {
             yield return $"switch({string.Join("", Header.GetSourceLines())})";
-            yield return "{";
             foreach (var line in base.GetSourceLines())
-                yield return $"{Space}{line}";
-            yield return "}";
+                yield return line;
         }
     }
 }

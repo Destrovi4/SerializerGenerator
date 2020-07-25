@@ -4,10 +4,9 @@ using System.Text;
 
 namespace Destr.Codegen.Source
 {
-    public class CaseSourceGenerator : SourceGenerator
+    public class CaseSourceGenerator : BlockGenerator
     {
         public bool isDefault = false;
-        public bool isBordered = false;
         public bool isBreak = false;
         public readonly LineSourceGenerator Header = new LineSourceGenerator();
 
@@ -24,14 +23,6 @@ namespace Destr.Codegen.Source
 
         public CaseSourceGenerator Default => SetDefault(true);
 
-        public CaseSourceGenerator SetBordered(bool value)
-        {
-            isBordered = value;
-            return this;
-        }
-
-        public CaseSourceGenerator Bordered => SetBordered(true);
-
         public CaseSourceGenerator SetBreak(bool value)
         {
             isBreak = value;
@@ -46,12 +37,12 @@ namespace Destr.Codegen.Source
                 yield return "default:";
             else 
                 yield return $"case {string.Join("", Header.GetSourceLines())}:";
-            if (isBordered)
-                yield return "{";
-            foreach (var line in base.GetSourceLines())
-                    yield return $"{Space}{line}";
-            if (isBordered)
-                yield return "}";
+            if(isBordered)
+                foreach (var line in base.GetSourceLines())
+                    yield return line;
+            else
+                foreach (var line in base.GetSourceLines())
+                        yield return $"{Space}{line}";
             if(isBreak)
                 yield return "break;";
         }

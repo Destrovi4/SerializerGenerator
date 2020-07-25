@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Destr.Codegen.Source
 {
-    public class MethodGenerator : SourceGenerator
+    public class MethodGenerator : BlockGenerator
     {
         public string ReturnType;
         public string Name;
@@ -15,6 +15,7 @@ namespace Destr.Codegen.Source
 
         public MethodGenerator(string name)
         {
+            isBordered = true;
             Name = name;
             Require(Arguments.Dependence);
         }
@@ -99,34 +100,11 @@ namespace Destr.Codegen.Source
 
         public MethodGenerator Argument<T>(string name) => Argument(name, typeof(T));
 
-        /*
-        public MethodGenerator AddLine(string line)
-        {
-            Add(line);
-            return this;
-        }*/
-
-        public SwitchSourceGenerator AddSwitch()
-        {
-            var generator = new SwitchSourceGenerator();
-            Add(generator);
-            return generator;
-        }
-
-        public SwitchSourceGenerator AddSwitch(string header)
-        {
-            var generator = AddSwitch();
-            generator.Header.Add(header);
-            return generator;
-        }
-
         public override IEnumerable<string> GetSourceLines()
         {
             yield return string.Join("", GenerateMethodDifinition());
-            yield return "{";
             foreach (var line in base.GetSourceLines())
-                yield return $"{Space}{line}";
-            yield return "}";
+                yield return line;
         }
 
         private IEnumerable<string> GenerateMethodDifinition()

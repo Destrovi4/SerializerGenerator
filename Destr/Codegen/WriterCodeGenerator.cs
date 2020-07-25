@@ -1,4 +1,4 @@
-﻿#define PRINT_TO_FILE
+﻿//#define PRINT_TO_FILE
 
 using Destr.Codegen;
 using System.Collections.Generic;
