@@ -40,10 +40,8 @@ namespace Destr.Codegen
             _serializerFieldByType = new Dictionary<Type, string>();
             var fields = _dataType.GetFields();
             int index = 0;
-            foreach (var field in _dataType.GetFields())
+            foreach (var field in FindSerializebleFields(_dataType))
             {
-                if (!IsSerializebleField(field))
-                    continue;
                 var fieldType = field.FieldType;
                 if (_serializerFieldByType.ContainsKey(fieldType))
                     continue;
@@ -55,7 +53,8 @@ namespace Destr.Codegen
             }
         }
 
-        private bool IsSerializebleField(FieldInfo field) => !(field.IsStatic || field.IsPrivate);
+        internal static bool IsSerializebleField(FieldInfo field) => !(field.IsStatic || field.IsPrivate);
+        internal static IEnumerable<FieldInfo> FindSerializebleFields(Type type) => type.GetFields().Where(IsSerializebleField);
 
         public IEnumerable<string> GenerateStrings()
         {
@@ -156,7 +155,7 @@ namespace Destr.Codegen
             return $"writer.Write(value.{field.Name})";
         }
 
-        private static string RealTypeName(Type type)
+        internal static string RealTypeName(Type type)
         {
             var name = type.Name;
             if (!type.IsGenericType) return name;

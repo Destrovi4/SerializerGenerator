@@ -9,7 +9,7 @@ using System.Reflection;
 
 namespace Destr.Codegen
 {
-    public class Serializer
+    public static class Serializer
     {
         private static readonly Dictionary<Type, object> SerializerByType = new Dictionary<Type, object>();
 
@@ -118,6 +118,20 @@ namespace Destr.Codegen
                 foreach (var line in generator.GenerateStrings())
                     Console.WriteLine(line);
 #endif
+        }
+
+        internal static string Defenition(Type type)
+        {
+            return string.Join(",", Generator.FindSerializebleFields(type)
+                .OrderBy(f => f.Name)
+                .Select(f => $"{Generator.RealTypeName(f.FieldType)}:{f.Name}"));
+        }
+
+        internal static IEnumerable<Type> Dependency(Type type)
+        {
+            foreach (FieldInfo field in Generator.FindSerializebleFields(type))
+                if (SerializerByType.ContainsKey(type))
+                    yield return field.FieldType;
         }
     }
 }
