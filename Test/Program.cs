@@ -51,11 +51,6 @@ namespace SerializerGenerator
             Console.WriteLine(etalon.b == result.b);
             */
 
-            //Serializer.Generate();
-            //var protocol = new TestProtocol();
-            //ProtocolPacket0 p0 = default;
-            //Console.WriteLine(Serializer.Defenition(typeof(TestPacketA)));
-
             /*
             MemoryStream stream = new MemoryStream(new byte[] { 1, 2, 3 });
             BinaryReader reader = new BinaryReader(stream);
@@ -73,37 +68,15 @@ namespace SerializerGenerator
             protocol.Listen((in ProtocolPacket0 packet) => { 
             
             });
-
-            MemoryStream stream = new MemoryStream(new byte[] { 1, 2, 3 });
-            BinaryReader reader = new BinaryReader(stream);
-            protocol.Read(reader);
             */
 
-            //foreach (var list in new ProtocolGenerator("", typeof(TestProtocol)).GenerateStrings())
-            //    Console.WriteLine(list);
+            Serializer.Generate();
+            var protocol = new TestProtocol();
+            ProtocolPacket0 p0 = default;
+            protocol.Write(null, in p0);
 
-            /*
-            SourceGenerator src = new SourceGenerator();
+            Console.WriteLine(Serializer.Defenition(typeof(TestPacketA)));
 
-            src.AddLine("1");
-            src.AddLine(()=> {
-                List<string> lines = new List<string>();
-                lines.Add("2");
-                lines.Add("3");
-                return lines;
-            });
-            src.AddLine(() => {
-                return "4";
-            });
-
-            foreach (string line in src.GetSourceLines())
-                Console.WriteLine(line);
-                */
-
-            /*
-            foreach (var list in new ProtocolGenerator(typeof(TestProtocol)).GetSourceLines())
-                Console.WriteLine(list);
-                */
             CodeGenerator.Generate();
         }
     }

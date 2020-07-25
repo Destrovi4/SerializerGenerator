@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Destr.Codegen.Source
 {
@@ -12,6 +13,7 @@ namespace Destr.Codegen.Source
         public bool isPrivate = false;
         public bool isOverride = false;
         private readonly SourceGenerator Arguments = new SourceGenerator();
+        public readonly SourceGenerator Where = new SourceGenerator();
 
         public MethodGenerator(string name)
         {
@@ -80,25 +82,40 @@ namespace Destr.Codegen.Source
             return this;
         }
 
-        public MethodGenerator Argument(string arg)
+        public MethodGenerator AddArgument(string arg)
         {
             Arguments.Add(arg);
             return this;
         }
 
-        public MethodGenerator Argument(string name, Type type)
+        public ArgumentGenerator MakeArgument()
+        {
+            ArgumentGenerator generator = new ArgumentGenerator();
+            Arguments.Add(generator);
+            return generator;
+        }
+
+        public ArgumentGenerator Argument => MakeArgument();
+        
+        public MethodGenerator AddArgument(string name, Type type)
         {
             Arguments.AddLine().Add(type).Add($" {name}");
             return this;
         }
 
-        public MethodGenerator Argument(string name, Type type, params Type[] args)
+        public MethodGenerator AddArgument(string name, Type type, params Type[] args)
         {
             Arguments.AddLine().Add(type, args).Add($" {name}");
             return this;
         }
 
-        public MethodGenerator Argument<T>(string name) => Argument(name, typeof(T));
+        public MethodGenerator AddArgument<T>(string name) => AddArgument(name, typeof(T));
+
+        public MethodGenerator AddWhere(string line)
+        {
+            Where.AddLine(line);
+            return this;
+        }
 
         public override IEnumerable<string> GetSourceLines()
         {
@@ -121,6 +138,10 @@ namespace Destr.Codegen.Source
                 yield return $"{ReturnType} ";
             yield return Name;
             yield return $"({string.Join(", ", Arguments.GetSourceLines())})";
+            var wheres = Where.GetSourceLines().ToArray();
+            if(wheres.Length > 0)
+                foreach (var line in wheres)
+                    yield return $" where {line}";
         }
     }
 }
