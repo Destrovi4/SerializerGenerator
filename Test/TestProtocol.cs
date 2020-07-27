@@ -26,10 +26,10 @@ namespace SerializerGenerator.Test
         public TestProtocol()
         {
             _descriptorRead[_0ProtocolPacket0Id] = P0ProtocolPacket0Reader;
-            _descriptorWrite[_0ProtocolPacket0Id] = (writer<ProtocolPacket0>)P0ProtocolPacket0Write;
+            _descriptorWrite[_0ProtocolPacket0Id] = (writer<ProtocolPacket0>)Write;
             _0ProtocolPacket0Serializer = Serializer.Get<ProtocolPacket0>();
             _descriptorRead[_1ProtocolPacket1Id] = P1ProtocolPacket1Reader;
-            _descriptorWrite[_1ProtocolPacket1Id] = (writer<ProtocolPacket1>)P1ProtocolPacket1Write;
+            _descriptorWrite[_1ProtocolPacket1Id] = (writer<ProtocolPacket1>)Write;
             _1ProtocolPacket1Serializer = Serializer.Get<ProtocolPacket1>();
         }
         public override void Read(BinaryReader reader)
@@ -60,7 +60,7 @@ namespace SerializerGenerator.Test
             _0ProtocolPacket0Serializer.Read(ref packet, reader);
             _0ProtocolPacket0Listener(in packet);
         }
-        public void P0ProtocolPacket0Write(BinaryWriter writer, in ProtocolPacket0 packet)
+        public void Write(BinaryWriter writer, in ProtocolPacket0 packet)
         {
             writer.Write(_0ProtocolPacket0Id);
             _0ProtocolPacket0Serializer.Write(writer, in packet);
@@ -71,7 +71,7 @@ namespace SerializerGenerator.Test
             _1ProtocolPacket1Serializer.Read(ref packet, reader);
             _1ProtocolPacket1Listener(in packet);
         }
-        public void P1ProtocolPacket1Write(BinaryWriter writer, in ProtocolPacket1 packet)
+        public void Write(BinaryWriter writer, in ProtocolPacket1 packet)
         {
             writer.Write(_1ProtocolPacket1Id);
             _1ProtocolPacket1Serializer.Write(writer, in packet);

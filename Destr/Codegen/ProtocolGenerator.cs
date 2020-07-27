@@ -83,7 +83,7 @@ namespace Destr.Codegen
                 string packageTypeName = SimpleName(packageType);
                 string id = $"_{fieldIndex}{packageTypeName}Id";
                 string reader = $"P{fieldIndex}{packageTypeName}Reader";
-                string writer = $"P{fieldIndex}{packageTypeName}Write";
+                string writer = $"Write";
                 string serializer = $"_{fieldIndex}{packageTypeName}Serializer";
                 string listener = $"_{fieldIndex}{packageTypeName}Listener";
 
