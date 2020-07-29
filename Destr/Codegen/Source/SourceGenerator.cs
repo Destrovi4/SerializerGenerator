@@ -1,5 +1,7 @@
-﻿using System;
+﻿#define PRINT_TO_FILE
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -12,6 +14,12 @@ namespace Destr.Codegen.Source
         private readonly HashSet<object> _dependence = new HashSet<object>();
 
         private List<object> _sources = new List<object>();
+
+        public virtual void Clear()
+        {
+            _dependence.Clear();
+            _sources.Clear();
+        }
 
         public SourceGenerator Add(string src)
         {
@@ -211,6 +219,25 @@ namespace Destr.Codegen.Source
             var name = type.Name;
             if (!type.IsGenericType) return name;
             return name.Substring(0, name.IndexOf('`'));
+        }
+
+
+        public void Write(string path)
+        {
+#if PRINT_TO_FILE
+            using var writer = new StreamWriter(path);
+            Write(writer);
+#else
+            Console.Out.WriteLine($"{nameof(path)}: {path}");
+            Write(Console.Out);
+#endif
+        }
+
+
+        public void Write(TextWriter writer)
+        {
+            foreach (var line in GetSourceLines())
+                writer.WriteLine(line);
         }
     }
 }

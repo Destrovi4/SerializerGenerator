@@ -1,6 +1,6 @@
 using Destr.Codegen;
-using System.IO;
 using SerializerGenerator;
+using System.IO;
 namespace SerializerGenerator.Test
 {
     [Generated]

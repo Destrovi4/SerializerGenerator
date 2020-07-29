@@ -12,7 +12,7 @@ namespace SerializerGenerator
     {
         private static void Main(string[] args)
         {
-
+            CodeGenerator.Generate();
 
             /*
             Serializer.Generate();
@@ -70,6 +70,7 @@ namespace SerializerGenerator
             });
             */
 
+            /*
             Serializer.Generate();
 
 
@@ -91,6 +92,7 @@ namespace SerializerGenerator
             Console.WriteLine(Serializer.Defenition(typeof(TestPacketA)));
 
             CodeGenerator.Generate();
+            */
         }
 
         public static void OnProtocolPacket0(in ProtocolPacket0 package)

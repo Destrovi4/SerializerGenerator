@@ -30,6 +30,14 @@ namespace Destr.Codegen.Source
             Add(GenerateClassWithNamespace);
         }
 
+        public override void Clear()
+        {
+            Attributes.Clear();
+            Extends.Clear();
+            Fields.Clear();
+            Methods.Clear();
+        }
+
         public MethodGenerator AddMethod(string name)
         {
             var method = new MethodGenerator(name);
