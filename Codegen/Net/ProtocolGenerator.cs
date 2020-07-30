@@ -4,41 +4,43 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using Destr.IO;
+using Destr.Protocol;
 
 namespace Destr.Codegen
 {
-    public class ProtocolGenerator : ClassGenerator
-    {
-        protected override bool FilterType(Type type)
-        {
-            if (type.IsInterface)
-                return false;
-            if (type.IsAbstract)
-                return false;
-
-            var baseType = type.BaseType;
-            if (!baseType.IsGenericType)
-                return false;
-
-            if (baseType.GetGenericTypeDefinition() != typeof(Protocol<>))
-                return false;
-
-            return true;
-        }
-
-        protected override IEnumerable<string> Generate(Type type) => new ProtocolSourceGenerator(type).GetSourceLines();
-    }
-
-    public class ProtocolSourceGenerator : ClassSourceGenerator
+    public class ProtocolSourceGenerator : ClassSourceGenerator, ICodeGenerator
     {
         private const string ReadingDescriptor = "_descriptorRead";
         private const string WritingDescriptor = "_descriptorWrite";
 
-        public ProtocolSourceGenerator(Type type)
+        public void Generate()
         {
-            Name = SimpleName(type);
-            Namespace = type.Namespace;
+            foreach (Type type in Assembly.GetExecutingAssembly().GetTypes())
+            {
+                if (type.IsInterface)
+                    continue;
+                if (type.IsAbstract)
+                    continue;
+                var baseType = type.BaseType;
+                if (!baseType.IsGenericType)
+                    continue;
+                if (baseType.GetGenericTypeDefinition() != typeof(Protocol<>))
+                    continue;
+                var generated = type.GetCustomAttribute<Generated>();
+                if (generated == null)
+                    continue;
 
+                Name = SimpleName(type);
+                Namespace = type.Namespace;
+                Clear();
+                Make(type);
+                Write(generated.File);
+            }
+        }
+
+        public void Make(Type type)
+        {
             Type abstractPackage = Type.MakeGenericSignatureType(typeof(IPacket<>), type);
             Type writerAction = Type.MakeGenericSignatureType(typeof(Action<>), typeof(BinaryWriter), abstractPackage);
 

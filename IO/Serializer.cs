@@ -1,13 +1,12 @@
 ﻿#define PRINT_TO_FILE
 
-using SerializerGenerator.Destr.Codegen;
+using Destr.Codegen;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 
-namespace Destr.Codegen
+namespace Destr.IO
 {
     public static class Serializer
     {
@@ -22,7 +21,7 @@ namespace Destr.Codegen
                 if (inter == null)
                     continue;
                 Type dataType = inter.GenericTypeArguments[0];
-                if(SerializerByType.ContainsKey(dataType))
+                if (SerializerByType.ContainsKey(dataType))
                 {
                     Console.WriteLine("Duble diffinition " + dataType);
                     continue;
@@ -49,7 +48,7 @@ namespace Destr.Codegen
         {
             return type.GetInterfaces()
                 .Where(i => i != typeof(Serializer))
-                .Where(i=> i.IsGenericType)
+                .Where(i => i.IsGenericType)
                 .Where(i => i.GetGenericTypeDefinition() == typeof(ISerializer<>))
                 .FirstOrDefault();
         }

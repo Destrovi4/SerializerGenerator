@@ -1,7 +1,7 @@
-﻿using Destr.Codegen;
+﻿using Destr.IO;
 using System.IO;
 
-namespace SerializerGenerator
+namespace Test
 {
     public class TemplateSerializerA : ISerializer<TestPacketA>
     {

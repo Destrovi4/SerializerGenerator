@@ -2,7 +2,10 @@ using Destr.Codegen;
 using System.IO;
 using System.Collections.Generic;
 using System;
-namespace SerializerGenerator.Test
+using Destr.IO;
+using Destr.Protocol;
+
+namespace Test
 {
     [Generated]
     public class TestProtocol : Protocol<TestProtocol>

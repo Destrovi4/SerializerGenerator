@@ -1,7 +1,7 @@
 ﻿using Destr.Codegen;
-using SerializerGenerator.Destr.Codegen;
+using Destr.Protocol;
 
-namespace SerializerGenerator.Test
+namespace Test
 {
     [SerializerGaranted]
     public struct ProtocolPacket0 : IPacket<TestProtocol>

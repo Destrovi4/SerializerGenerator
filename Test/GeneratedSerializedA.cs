@@ -1,6 +1,7 @@
 using Destr.Codegen;
+using Destr.IO;
 using System.IO;
-namespace SerializerGenerator
+namespace Test
 {
     [Generated]
     public class GeneratedSerializedA : ISerializer<TestPacketA>

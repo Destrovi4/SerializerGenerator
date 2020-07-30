@@ -1,9 +1,6 @@
-﻿using SerializerGenerator.Destr.Codegen;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Destr.Codegen;
 
-namespace SerializerGenerator.Test
+namespace Test
 {
     [SerializerGaranted]
     public struct TestPacketB

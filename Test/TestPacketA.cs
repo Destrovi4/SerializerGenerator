@@ -1,4 +1,4 @@
-﻿namespace SerializerGenerator
+﻿namespace Test
 {
     public struct TestPacketA
     {

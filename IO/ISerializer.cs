@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace Destr.Codegen
+namespace Destr.IO
 {
     public interface ISerializer<T> where T : struct
     {
