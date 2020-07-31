@@ -95,7 +95,7 @@ namespace Destr.Codegen.Source
             if(extends.Length == 0)
                 yield break;
             yield return " : ";
-            yield return string.Join(',', extends);
+            yield return string.Join(",", extends);
         }
 
         protected IEnumerable<string> GenerateClassBody(string offset)

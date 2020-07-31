@@ -1,10 +1,9 @@
 using Destr.Codegen;
+using Destr.Protocol;
+using Destr.IO;
 using System.IO;
 using System.Collections.Generic;
 using System;
-using Destr.IO;
-using Destr.Protocol;
-
 namespace Test
 {
     [Generated]
@@ -39,7 +38,7 @@ namespace Test
         {
             _descriptorRead[reader.ReadUInt16()].Invoke(reader);
         }
-        public override void Write<D>(BinaryWriter writer, in D data) where D : struct
+        public override void Write<D>(BinaryWriter writer, in D data)
         {
             (_descriptorWrite[_packetIdByType[typeof(D)]] as writer<D>)(writer, in data);
         }

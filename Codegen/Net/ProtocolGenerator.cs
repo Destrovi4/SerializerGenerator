@@ -41,8 +41,8 @@ namespace Destr.Codegen
 
         public void Make(Type type)
         {
-            Type abstractPackage = Type.MakeGenericSignatureType(typeof(IPacket<>), type);
-            Type writerAction = Type.MakeGenericSignatureType(typeof(Action<>), typeof(BinaryWriter), abstractPackage);
+            Type abstractPackage = typeof(IPacket<>).MakeGenericType(type);
+            Type writerAction = typeof(Action<,>).MakeGenericType(typeof(BinaryWriter), abstractPackage);
 
             Attributes.Add<Generated>();
             var packageTypes = Assembly.GetExecutingAssembly()
@@ -69,7 +69,7 @@ namespace Destr.Codegen
 
             AddMethod("Read").Public.Void.Override.AddArgument<BinaryReader>("reader")
                 .AddLine($"{ReadingDescriptor}[reader.ReadUInt16()].Invoke(reader);");
-            var abstractWriter = AddMethod("Write<D>").Public.Void.Override.AddArgument<BinaryWriter>("writer").AddArgument("in D data").AddWhere("D : struct")
+            var abstractWriter = AddMethod("Write<D>").Public.Void.Override.AddArgument<BinaryWriter>("writer").AddArgument("in D data")//.AddWhere("D : struct")
                 .AddLine($"(_descriptorWrite[_packetIdByType[typeof(D)]] as writer<D>)(writer, in data);");
             
             var listen = AddMethod("Listen<D>").Public.Override.Void.AddArgument($"PacketListener<{Name}, D> listener");

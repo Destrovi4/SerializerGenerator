@@ -225,8 +225,8 @@ namespace Destr.Codegen.Source
         public void Write(string path)
         {
 #if PRINT_TO_FILE
-            using var writer = new StreamWriter(path);
-            Write(writer);
+            using (var writer = new StreamWriter(path))
+                Write(writer);
 #else
             Console.Out.WriteLine($"{nameof(path)}: {path}");
             Write(Console.Out);

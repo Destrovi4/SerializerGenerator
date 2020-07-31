@@ -51,7 +51,7 @@ namespace Destr.Codegen
         public void Make(Type type)
         {
             Attributes.Add<Generated>();
-            Extends.Add(Type.MakeGenericSignatureType(typeof(ISerializer<>), type));
+            Extends.Add(typeof(ISerializer<>).MakeGenericType(type));
             var read = AddMethod("Read").Public.Void;
             read.Argument.Ref.Add(type).Add("value");
             read.Argument.Add<BinaryReader>().Add("reader");
@@ -61,6 +61,7 @@ namespace Destr.Codegen
             write.Argument.In.Add(type).Add("value");
 
             int index = 0;
+            Dictionary<Type, string> serializerFieldByType = new Dictionary<Type, string>();
             foreach (var field in FindSerializebleFields(type))
             {
                 Type fieldType = field.FieldType;
@@ -68,8 +69,12 @@ namespace Destr.Codegen
                 object serializer = Serializer.Get(fieldType);
                 if (serializer != null)
                 {
-                    string serFieldName = $"_ser{index++}{SimpleName(fieldType)}";
-                    Fields.Line.Add("private ").Add(typeof(ISerializer<>), fieldType).Add($" {serFieldName} = null;");
+                    if (!serializerFieldByType.TryGetValue(fieldType, out string serFieldName))
+                    {
+                        serFieldName = $"_ser{index++}{SimpleName(fieldType)}";
+                        serializerFieldByType.Add(fieldType, serFieldName);
+                        Fields.Line.Add("private ").Add(typeof(ISerializer<>), fieldType).Add($" {serFieldName} = null;");
+                    }
                     read.Line.Add($"{serFieldName}.Read(ref value.{fieldName}, reader);");
                     write.Line.Add($"{serFieldName}.Write(writer, in value.{fieldName});");
                     continue;
@@ -82,6 +87,7 @@ namespace Destr.Codegen
                 else if (fieldType == typeof(float)) read.Add($"value.{fieldName} = reader.ReadSingle();");
                 else if (fieldType == typeof(double)) read.Add($"value.{fieldName} = reader.ReadDouble();");
                 else if (fieldType == typeof(bool)) read.Add($"value.{fieldName} = reader.ReadBoolean();");
+                else if (fieldType == typeof(string)) read.Add($"value.{fieldName} = reader.ReadString();");
                 else throw new Exception($"{fieldType} not supported for field {fieldName}");
 
                 write.Add($"writer.Write(value.{field.Name});");
