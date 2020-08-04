@@ -1,7 +1,7 @@
 ﻿using Destr.IO;
 using System.IO;
 
-namespace Test
+namespace Testspace
 {
     public class TemplateSerializerA : ISerializer<TestPacketA>
     {

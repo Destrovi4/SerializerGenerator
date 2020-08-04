@@ -4,7 +4,7 @@ using Destr.IO;
 using System.IO;
 using System.Collections.Generic;
 using System;
-namespace Test
+namespace Testspace
 {
     [Generated]
     public class TestProtocol : Protocol<TestProtocol>

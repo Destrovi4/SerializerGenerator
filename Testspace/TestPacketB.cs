@@ -1,6 +1,6 @@
 ﻿using Destr.Codegen;
 
-namespace Test
+namespace Testspace
 {
     [SerializerGaranted]
     public struct TestPacketB

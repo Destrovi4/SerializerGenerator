@@ -1,4 +1,4 @@
-﻿namespace Test
+﻿namespace Testspace
 {
     public struct TestPacketA
     {

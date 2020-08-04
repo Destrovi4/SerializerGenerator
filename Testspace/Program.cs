@@ -3,7 +3,7 @@ using Destr.Protocol;
 using System;
 using System.IO;
 
-namespace Test
+namespace Testspace
 {
     class Program
     {
