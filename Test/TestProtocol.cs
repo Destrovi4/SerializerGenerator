@@ -1,10 +1,9 @@
 using Destr.Codegen;
+using Destr.Protocol;
+using Destr.IO;
 using System.IO;
 using System.Collections.Generic;
 using System;
-using Destr.IO;
-using Destr.Protocol;
-
 namespace Test
 {
     [Generated]
