@@ -10,7 +10,13 @@ namespace Destr.Codegen
 {
     public class SerializerGenerator : ClassSourceGenerator, ICodeGenerator
     {
-        public void Generate() => Generate(Assembly.GetExecutingAssembly());
+        public void Generate()
+        {
+            foreach (var assembly in CodeGenerator.GetAssemblys())
+            {
+                Generate(assembly);
+            }
+        }
 
         public void Generate(Assembly assembly)
         {
@@ -27,7 +33,7 @@ namespace Destr.Codegen
                     Make(dataType);
                     Write(generated.File);
                 }
-                
+                Console.WriteLine(type);
                 SerializerGaranted garanted = type.GetCustomAttribute<SerializerGaranted>();
                 if(garanted != null && Serializer.Get(type) == null)
                 {

@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 namespace Destr.Codegen
 {
     [AttributeUsage(AttributeTargets.Struct)]
-    class SerializerGaranted : Attribute
+    public class SerializerGaranted : Attribute
     {
         public readonly string File;
         public readonly string Member;

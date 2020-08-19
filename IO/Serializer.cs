@@ -12,10 +12,17 @@ namespace Destr.IO
     {
         private static readonly Dictionary<Type, object> SerializerByType = new Dictionary<Type, object>();
 
+        private static readonly HashSet<Assembly> AssemblyList = new HashSet<Assembly>();
+
         static Serializer()
         {
-            var assembly = Assembly.GetExecutingAssembly();
-            foreach (Type type in assembly.GetTypes())
+            AssemblyList.Add(Assembly.GetExecutingAssembly());
+        }
+
+        public static void Init()
+        {
+            var types = AssemblyList.SelectMany(a => a.GetTypes());
+            foreach (Type type in types)
             {
                 Type inter = ExtractSerializerInterface(type);
                 if (inter == null)
@@ -76,5 +83,9 @@ namespace Destr.IO
                 if (SerializerByType.ContainsKey(type))
                     yield return field.FieldType;
         }
+
+        public static void AddAssembly(Assembly assembly) => AssemblyList.Add(assembly);
+
+        public static IEnumerable<Assembly> GetAssemblys() => AssemblyList;
     }
 }

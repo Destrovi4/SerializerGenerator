@@ -16,7 +16,8 @@ namespace Destr.Codegen
 
         public void Generate()
         {
-            foreach (Type type in Assembly.GetExecutingAssembly().GetTypes())
+            var types = CodeGenerator.GetAssemblys().SelectMany(a => a.GetTypes());
+            foreach (Type type in types)
             {
                 if (type.IsInterface)
                     continue;
