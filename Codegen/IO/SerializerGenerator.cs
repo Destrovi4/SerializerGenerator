@@ -12,15 +12,7 @@ namespace Destr.Codegen
     {
         public void Generate()
         {
-            foreach (var assembly in CodeGenerator.GetAssemblys())
-            {
-                Generate(assembly);
-            }
-        }
-
-        public void Generate(Assembly assembly)
-        {
-            foreach (Type type in assembly.GetTypes())
+            foreach (Type type in CodeGenerator.GetTypes())
             {
                 Generated generated = type.GetCustomAttribute<Generated>();
                 Type serializer = type.GetInterfaces().Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(ISerializer<>)).FirstOrDefault();

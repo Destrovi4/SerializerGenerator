@@ -23,9 +23,9 @@ namespace Destr.Codegen
                 if (type.IsAbstract)
                     continue;
                 var baseType = type.BaseType;
-                if (!baseType.IsGenericType)
-                    continue;
-                if (baseType.GetGenericTypeDefinition() != typeof(Protocol<>))
+                //if (!baseType.IsGenericType)
+                //    continue;
+                if (FindProtocolInterface(type) == null)
                     continue;
                 var generated = type.GetCustomAttribute<Generated>();
                 if (generated == null)
@@ -37,6 +37,11 @@ namespace Destr.Codegen
                 Make(type);
                 Write(generated.File);
             }
+        }
+
+        private Type FindProtocolInterface(Type type)
+        {
+            return type.GetInterfaces().Where(i => i.IsGenericType).FirstOrDefault(i => i.GetGenericTypeDefinition() == typeof(IProtocol<>));
         }
 
         public void Make(Type type)
@@ -58,7 +63,7 @@ namespace Destr.Codegen
 
             packageTypes.OrderBy(t => descriptionByType[t]);
 
-            Fields.AddLine($"public override string Definition => \"{string.Join(";", packageTypes.Select(t => descriptionByType[t]))}\";");
+            Fields.AddLine($"public string Definition => \"{string.Join(";", packageTypes.Select(t => descriptionByType[t]))}\";");
 
             var staticConstructor = AddMethod(Name).Static;
             var constructor = AddMethod(Name).Public;
@@ -67,17 +72,19 @@ namespace Destr.Codegen
             Fields.AddLine("private static readonly Dictionary<Type, uint> _packetIdByType = new Dictionary<Type, uint>();");
 
 
-            AddMethod("Read").Public.Void.Override.AddArgument<BinaryReader>("reader")
+            AddMethod("Read").Public.Void.AddArgument<BinaryReader>("reader")
                 .AddLine($"{ReadingDescriptor}[reader.ReadUInt16()].Invoke(reader);");
-            var abstractWriter = AddMethod("Write<D>").Public.Void.Override.AddArgument<BinaryWriter>("writer").AddArgument("in D data")//.AddWhere("D : struct")
+            var abstractWriter = AddMethod("Write<D>").Public.Void.AddArgument<BinaryWriter>("writer").AddArgument("in D data")//.AddWhere("D : struct")
+                .AddWhere($"D : struct, IPacket<{SimpleName(type)}>")
                 .AddLine($"(_descriptorWrite[_packetIdByType[typeof(D)]] as writer<D>)(writer, in data);");
-            
-            var listen = AddMethod("Listen<D>").Public.Override.Void.AddArgument($"PacketListener<{Name}, D> listener");
+
+            var listen = AddMethod("Listen<D>").Public.Void.AddArgument($"PacketListener<{Name}, D> listener")
+                .AddWhere($"D : struct, IPacket<{SimpleName(type)}>");
             var listenSwitch = listen.AddSwitch("_packetIdByType[typeof(D)]");
             listenSwitch.Case.Default.Add("throw new Exception();");
 
             Require<BinaryReader>();
-            Extends.Add(typeof(Protocol<>), type);
+            Extends.Add(typeof(IProtocol<>), type);
 
             int fieldIndex = 0;
             foreach (var packageType in packageTypes)

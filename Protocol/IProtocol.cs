@@ -3,18 +3,18 @@ using System.IO;
 
 namespace Destr.Protocol
 {
-    public delegate void PacketListener<T, D>(in D packet) where D : struct, IPacket<T> where T : Protocol<T>;
-    public abstract class Protocol<T> where T : Protocol<T>
+    public delegate void PacketListener<T, D>(in D packet) where D : struct, IPacket<T> where T : IProtocol<T>;
+    public interface IProtocol<T> where T : IProtocol<T>
     {
-        public abstract string Definition { get; }
-        public abstract void Read(BinaryReader reader);
-        public abstract void Write<D>(BinaryWriter writer, in D data) where D : struct, IPacket<T>;
-        public abstract void Listen<D>(PacketListener<T, D> listener) where D : struct, IPacket<T>;
+        string Definition { get; }
+        void Read(BinaryReader reader);
+        void Write<D>(BinaryWriter writer, in D data) where D : struct, IPacket<T>;
+        void Listen<D>(PacketListener<T, D> listener) where D : struct, IPacket<T>;
     }
 
     public static class ProtocolDefaults // Protocol => IProtocol
     {
-        public static PacketListener<T, D> GetSender<T, D>(this T protocol) where D : struct, IPacket<T> where T : Protocol<T>
+        public static PacketListener<T, D> GetSender<T, D>(this T protocol) where D : struct, IPacket<T> where T : IProtocol<T>
         {
             foreach (var method in protocol.GetType().GetMethods())
             {
