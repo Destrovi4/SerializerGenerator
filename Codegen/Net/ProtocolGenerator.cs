@@ -16,8 +16,7 @@ namespace Destr.Codegen
 
         public void Generate()
         {
-            var types = CodeGenerator.GetAssemblys().SelectMany(a => a.GetTypes());
-            foreach (Type type in types)
+            foreach (Type type in CodeGenerator.GetTypes())
             {
                 if (type.IsInterface)
                     continue;
@@ -46,8 +45,7 @@ namespace Destr.Codegen
             Type writerAction = typeof(Action<,>).MakeGenericType(typeof(BinaryWriter), abstractPackage);
 
             Attributes.Add<Generated>();
-            var packageTypes = Assembly.GetExecutingAssembly()
-                .GetTypes()
+            var packageTypes = CodeGenerator.GetTypes()
                 .Where(t => t.GetInterfaces()
                     .Where(i => i.IsGenericType)
                     .Where(i => i.GetGenericTypeDefinition() == typeof(IPacket<>))

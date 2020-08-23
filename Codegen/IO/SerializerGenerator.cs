@@ -33,7 +33,6 @@ namespace Destr.Codegen
                     Make(dataType);
                     Write(generated.File);
                 }
-                Console.WriteLine(type);
                 SerializerGaranted garanted = type.GetCustomAttribute<SerializerGaranted>();
                 if(garanted != null && Serializer.Get(type) == null)
                 {

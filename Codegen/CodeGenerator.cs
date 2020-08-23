@@ -32,5 +32,7 @@ namespace Destr.Codegen
         public static void AddAssembly(Assembly assembly) => AssemblyList.Add(assembly);
 
         public static IEnumerable<Assembly> GetAssemblys() => AssemblyList;
+
+        public static IEnumerable<Type> GetTypes() => GetAssemblys().SelectMany(a => a.GetTypes());
     }
 }
