@@ -57,7 +57,8 @@ namespace Destr.Codegen
                 descriptionByType.Add(packageType, Serializer.Defenition(packageType));
 
             packageTypes.OrderBy(t => descriptionByType[t]);
-            Fields.AddLine($"public const string Definition = \"{string.Join(";", packageTypes.Select(t => descriptionByType[t]))}\";");
+
+            Fields.AddLine($"public override string Definition => \"{string.Join(";", packageTypes.Select(t => descriptionByType[t]))}\";");
 
             var staticConstructor = AddMethod(Name).Static;
             var constructor = AddMethod(Name).Public;

@@ -10,7 +10,7 @@ namespace Test
     [Generated]
     public class TestProtocol : Protocol<TestProtocol>
     {
-        public const string Definition = "Byte:a,TestPacketB:b;Int32:test";
+        public override string Definition => "Byte:a,TestPacketB:b;Int32:test";
         private static readonly Dictionary<Type, uint> _packetIdByType = new Dictionary<Type, uint>();
         private const ushort _0ProtocolPacket0Id = 0;
         private ISerializer<ProtocolPacket0> _0ProtocolPacket0Serializer = null;
