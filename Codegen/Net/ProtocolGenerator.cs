@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using Destr.IO;
 using Destr.Protocol;
+using Assets.SerializerGenerator.Codegen;
 
 namespace Destr.Codegen
 {
@@ -22,10 +23,7 @@ namespace Destr.Codegen
                     continue;
                 if (type.IsAbstract)
                     continue;
-                var baseType = type.BaseType;
-                //if (!baseType.IsGenericType)
-                //    continue;
-                if (FindProtocolInterface(type) == null)
+                if (type.FindGenericInterface(typeof(IProtocol<>)) == null)
                     continue;
                 var generated = type.GetCustomAttribute<Generated>();
                 if (generated == null)
@@ -37,11 +35,6 @@ namespace Destr.Codegen
                 Make(type);
                 Write(generated.File);
             }
-        }
-
-        private Type FindProtocolInterface(Type type)
-        {
-            return type.GetInterfaces().Where(i => i.IsGenericType).FirstOrDefault(i => i.GetGenericTypeDefinition() == typeof(IProtocol<>));
         }
 
         public void Make(Type type)

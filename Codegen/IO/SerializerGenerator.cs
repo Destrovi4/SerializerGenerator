@@ -14,16 +14,19 @@ namespace Destr.Codegen
         {
             foreach (Type type in CodeGenerator.GetTypes())
             {
-                Generated generated = type.GetCustomAttribute<Generated>();
+                Generated[] generateds = type.GetCustomAttributes<Generated>().ToArray();
                 Type serializer = type.GetInterfaces().Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(ISerializer<>)).FirstOrDefault();
-                if(generated != null && serializer != null)
+                if(generateds != null && generateds.Length > 0 && serializer != null)
                 {
-                    var dataType = serializer.GetGenericArguments()[0];
-                    Name = SimpleName(type);
-                    Namespace = type.Namespace;
-                    Clear();
-                    Make(dataType);
-                    Write(generated.File);
+                    foreach (var generated in generateds)
+                    {
+                        var dataType = serializer.GetGenericArguments()[0];
+                        Name = SimpleName(type);
+                        Namespace = type.Namespace;
+                        Clear();
+                        Make(dataType);
+                        Write(generated.File);
+                    }
                 }
                 SerializerGaranted garanted = type.GetCustomAttribute<SerializerGaranted>();
                 if(garanted != null && Serializer.Get(type) == null)
