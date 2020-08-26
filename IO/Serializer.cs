@@ -36,17 +36,20 @@ namespace Destr.IO
                 }
                 SerializerByType.Add(dataType, Activator.CreateInstance(type));
             }
-
-            foreach (var instance in SerializerByType.Values)
+            string[] sss = AssemblyList.SelectMany(a => a.GetTypes()).Select(t=>t.Name).ToArray();
+            foreach (var type in AssemblyList.SelectMany(a => a.GetTypes()))
             {
-                Type type = instance.GetType();
                 foreach (var field in type.GetTypeInfo().DeclaredFields)
                 {
+                    if (!field.IsStatic)
+                        continue;
                     Type fieldType = field.FieldType;
+                    if (!fieldType.IsGenericType)
+                        continue;
                     if (fieldType.GetGenericTypeDefinition() != typeof(ISerializer<>))
                         continue;
                     Type dataType = fieldType.GenericTypeArguments[0];
-                    field.SetValue(instance, SerializerByType[dataType]);
+                    field.SetValue(type, SerializerByType[dataType]);
                 }
             }
         }

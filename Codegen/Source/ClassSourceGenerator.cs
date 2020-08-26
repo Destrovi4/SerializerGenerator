@@ -8,10 +8,13 @@ namespace Destr.Codegen.Source
     {
         public string Name;
         public string Namespace;
-        public readonly SourceGenerator Attributes = new SourceGenerator();
+        public readonly AttributesGenerator Attributes = new AttributesGenerator();
         public readonly SourceGenerator Extends = new SourceGenerator();
         public readonly SourceGenerator Fields = new SourceGenerator();
         public readonly SourceGenerator Methods = new SourceGenerator();
+
+        private bool _isPublic = true;
+        private bool _isPartial = false;
 
         public ClassSourceGenerator(Type type) : this()
         {
@@ -32,11 +35,29 @@ namespace Destr.Codegen.Source
 
         public override void Clear()
         {
+            _isPublic = true;
+            _isPartial = false;
             Attributes.Clear();
             Extends.Clear();
             Fields.Clear();
             Methods.Clear();
         }
+
+        public ClassSourceGenerator SetPublic(bool isPublic)
+        {
+            _isPublic = isPublic;
+            return this;
+        }
+
+        public ClassSourceGenerator Public => SetPublic(true);
+
+        public ClassSourceGenerator SetPartial(bool isPartial)
+        {
+            _isPartial = isPartial;
+            return this;
+        }
+
+        public ClassSourceGenerator Partial => SetPartial(true);
 
         public MethodGenerator AddMethod(string name)
         {
@@ -79,7 +100,7 @@ namespace Destr.Codegen.Source
             var attributes = Attributes.GetSourceLines().ToArray();
             if (attributes.Length != 0)
                 yield return $"{offset}[{string.Join(", ", attributes)}]";
-            yield return string.Join("", GenerateClassDifinition(offset));
+            yield return string.Join(" ", GenerateClassDifinition(offset));
             yield return $"{offset}{{";
             foreach (var line in GenerateClassBody($"{offset}{Space}"))
                 yield return line;
@@ -89,12 +110,16 @@ namespace Destr.Codegen.Source
         private IEnumerable<string> GenerateClassDifinition(string offset)
         {
             yield return offset;
-            yield return "public class ";
+            if (_isPublic)
+                yield return "public";
+            if (_isPartial)
+                yield return "partial";
+            yield return "class";
             yield return Name;
             var extends = Extends.GetSourceLines().ToArray();
             if(extends.Length == 0)
                 yield break;
-            yield return " : ";
+            yield return ":";
             yield return string.Join(",", extends);
         }
 

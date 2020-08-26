@@ -6,6 +6,7 @@ namespace Destr.Protocol
     public delegate void PacketListener<T, D>(in D packet) where D : struct, IPacket<T> where T : IProtocol<T>;
     public interface IProtocol<T> where T : IProtocol<T>
     {
+        ushort GetPacketId(Type packerType);
         string Definition { get; }
         void Read(BinaryReader reader);
         void Write<D>(BinaryWriter writer, in D data) where D : struct, IPacket<T>;

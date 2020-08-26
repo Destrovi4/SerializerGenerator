@@ -53,8 +53,8 @@ namespace Destr.Codegen
             Attributes.Add<Generated>();
             Extends.Add(typeof(ISerializer<>).MakeGenericType(type));
             var read = AddMethod("Read").Public.Void;
-            read.Argument.Ref.Add(type).Add("value");
             read.Argument.Add<BinaryReader>().Add("reader");
+            read.Argument.Out.Add(type).Add("value");
 
             var write = AddMethod("Write").Public.Void;
             write.Argument.Add<BinaryWriter>().Add("writer");
@@ -73,9 +73,9 @@ namespace Destr.Codegen
                     {
                         serFieldName = $"_ser{index++}{SimpleName(fieldType)}";
                         serializerFieldByType.Add(fieldType, serFieldName);
-                        Fields.Line.Add("private ").Add(typeof(ISerializer<>), fieldType).Add($" {serFieldName} = null;");
+                        Fields.Line.Add("private static ").Add(typeof(ISerializer<>), fieldType).Add($" {serFieldName} = null;");
                     }
-                    read.Line.Add($"{serFieldName}.Read(ref value.{fieldName}, reader);");
+                    read.Line.Add($"{serFieldName}.Read(reader, out value.{fieldName});");
                     write.Line.Add($"{serFieldName}.Write(writer, in value.{fieldName});");
                     continue;
                 }

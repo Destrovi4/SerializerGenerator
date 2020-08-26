@@ -125,7 +125,14 @@ namespace Destr.Codegen.Source
         public IEnumerable<Type> Dependence()
         {
             foreach (var type in ExtractTypes(_dependence))
+            {
+                if(type.IsGenericType)
+                {
+                    foreach (var arg in type.GetGenericArguments())
+                        yield return arg;
+                }
                 yield return type;
+            }
         }
 
         public virtual IEnumerable<string> GetSourceLines() {

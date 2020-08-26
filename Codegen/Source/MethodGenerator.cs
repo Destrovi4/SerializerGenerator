@@ -20,6 +20,7 @@ namespace Destr.Codegen.Source
             isBordered = true;
             Name = name;
             Require(Arguments.Dependence);
+            Require(Where.Dependence);
         }
 
         public MethodGenerator SetStatic(bool value)
