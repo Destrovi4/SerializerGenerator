@@ -4,12 +4,12 @@ using System.Runtime.CompilerServices;
 namespace Destr.Codegen
 {
     [AttributeUsage(AttributeTargets.Struct)]
-    public class SerializerGaranted : Attribute
+    public class SerializerGarantedAttribute : Attribute
     {
         public readonly string File;
         public readonly string Member;
         public readonly int Line;
-        public SerializerGaranted
+        public SerializerGarantedAttribute
         (
             [CallerFilePath] string file = "",
             [CallerMemberName] string member = "",

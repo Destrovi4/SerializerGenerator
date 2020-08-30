@@ -28,7 +28,7 @@ namespace Destr.Codegen
                         Write(generated.File);
                     }
                 }
-                SerializerGaranted garanted = type.GetCustomAttribute<SerializerGaranted>();
+                SerializerGarantedAttribute garanted = type.GetCustomAttribute<SerializerGarantedAttribute>();
                 if(garanted != null && Serializer.Get(type) == null)
                 {
                     string directory = Path.GetDirectoryName(garanted.File);
