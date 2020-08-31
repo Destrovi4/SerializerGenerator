@@ -59,9 +59,12 @@ namespace Assets.SerializerGenerator.Codegen.Net
 
             var readMethod = AddMethod("ReadPackets").Public.Void;
             readMethod.Argument.Add<BinaryReader>().Add(" reader");
-            var readSwitch = readMethod.AddSwitch("reader.ReadUInt16()");
 
-            readSwitch.Line.Add("default: throw new ").Add<Exception>().Add("();");
+            var packetIdFeild = "packetId";
+            readMethod.AddLine($"ushort {packetIdFeild} = reader.ReadUInt16();");
+            var readSwitch = readMethod.AddSwitch(packetIdFeild);
+
+            readSwitch.Line.Add("default: throw new ").Add<Exception>().Add($"($\"Wrong packet id: {{{packetIdFeild}}}\");");
 
             int id = 0;
             foreach (Type packetType in packetTypeList)

@@ -83,6 +83,8 @@ namespace Assets.SerializerGenerator.Codegen.Net
                 specializedSend.Argument.In.Add(packetType).Add("packet");
                 specializedSend.AddLine($"{queueField}.Enqueue(packet);");
                 specializedSend.AddLine("OnPacketSended();");
+
+                id++;
             }
 
             var sendMethod = AddMethod("SendPacket<D>").Public.Void;
