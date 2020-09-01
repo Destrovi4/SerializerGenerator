@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 
+
 namespace Destr.Codegen
 {
     [AttributeUsage(AttributeTargets.Struct)]
@@ -9,6 +10,7 @@ namespace Destr.Codegen
         public readonly string File;
         public readonly string Member;
         public readonly int Line;
+
         public SerializerGarantedAttribute
         (
             [CallerFilePath] string file = "",

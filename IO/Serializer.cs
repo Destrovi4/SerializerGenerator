@@ -49,7 +49,14 @@ namespace Destr.IO
                     if (fieldType.GetGenericTypeDefinition() != typeof(ISerializer<>))
                         continue;
                     Type dataType = fieldType.GenericTypeArguments[0];
-                    field.SetValue(type, SerializerByType[dataType]);
+                    if (SerializerByType.TryGetValue(dataType, out object serializer))
+                    {
+                        field.SetValue(type, serializer);
+                    }
+                    else
+                    {
+                        throw new KeyNotFoundException($"{dataType} serializer not found!");
+                    }
                 }
             }
         }
