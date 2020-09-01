@@ -37,6 +37,7 @@ namespace Destr.IO
                 SerializerByType.Add(dataType, Activator.CreateInstance(type));
             }
             string[] sss = AssemblyList.SelectMany(a => a.GetTypes()).Select(t=>t.Name).ToArray();
+            List<Type> notFound = new List<Type>();
             foreach (var type in AssemblyList.SelectMany(a => a.GetTypes()))
             {
                 foreach (var field in type.GetTypeInfo().DeclaredFields)
@@ -55,9 +56,14 @@ namespace Destr.IO
                     }
                     else
                     {
-                        throw new KeyNotFoundException($"{dataType} serializer not found!");
+                        notFound.Add(type);
                     }
                 }
+            }
+
+            if (notFound.Count > 0)
+            {
+                throw new KeyNotFoundException(string.Join(",", notFound.Select(t => t.Name)));
             }
         }
 
