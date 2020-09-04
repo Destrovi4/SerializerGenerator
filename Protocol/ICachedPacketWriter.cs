@@ -1,5 +1,6 @@
 ﻿using System.IO;
 
+
 namespace Destr.Protocol
 {
     public interface ICachedPacketWriter<T> where T : IProtocol<T>

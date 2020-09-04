@@ -1,10 +1,12 @@
 ﻿#define PRINT_TO_FILE
 
-using Destr.Codegen;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Destr.Codegen;
+using Destr.Codegen.Source;
+
 
 namespace Destr.IO
 {
@@ -25,30 +27,27 @@ namespace Destr.IO
             foreach (Type type in types)
             {
                 Type inter = ExtractSerializerInterface(type);
-                if (inter == null)
-                    continue;
+                if (inter == null) continue;
                 Type dataType = inter.GenericTypeArguments[0];
                 if (SerializerByType.ContainsKey(dataType))
                 {
-                    Console.WriteLine("Duble diffinition " + dataType);
+                    Console.WriteLine($"Double definition {dataType}");
                     continue;
+
                     //TODO переzапись с приоритетом у не генерированной реалиzации
                 }
                 SerializerByType.Add(dataType, Activator.CreateInstance(type));
             }
-            string[] sss = AssemblyList.SelectMany(a => a.GetTypes()).Select(t=>t.Name).ToArray();
+            string[] sss = AssemblyList.SelectMany(a => a.GetTypes()).Select(t => t.Name).ToArray();
             List<Type> notFound = new List<Type>();
             foreach (var type in AssemblyList.SelectMany(a => a.GetTypes()))
             {
                 foreach (var field in type.GetTypeInfo().DeclaredFields)
                 {
-                    if (!field.IsStatic)
-                        continue;
+                    if (!field.IsStatic) continue;
                     Type fieldType = field.FieldType;
-                    if (!fieldType.IsGenericType)
-                        continue;
-                    if (fieldType.GetGenericTypeDefinition() != typeof(ISerializer<>))
-                        continue;
+                    if (!fieldType.IsGenericType) continue;
+                    if (fieldType.GetGenericTypeDefinition() != typeof(ISerializer<>)) continue;
                     Type dataType = fieldType.GenericTypeArguments[0];
                     if (SerializerByType.TryGetValue(dataType, out object serializer))
                     {
@@ -86,22 +85,28 @@ namespace Destr.IO
             return SerializerByType.TryGetValue(type, out var serializer) ? serializer : null;
         }
 
-        internal static string Defenition(Type type)
+        internal static string Definition(Type type)
         {
-            return string.Join(",", SerializerGenerator.FindSerializebleFields(type)
+            return string.Join(",", SerializerGenerator.FindSerializableFields(type)
                 .OrderBy(f => f.Name)
-                .Select(f => $"{SerializerGenerator.RealTypeName(f.FieldType)}:{f.Name}"));
+                .Select(f => $"{SourceGenerator.RealTypeName(f.FieldType)}:{f.Name}"));
         }
 
         internal static IEnumerable<Type> Dependency(Type type)
         {
-            foreach (FieldInfo field in SerializerGenerator.FindSerializebleFields(type))
+            foreach (FieldInfo field in SerializerGenerator.FindSerializableFields(type))
                 if (SerializerByType.ContainsKey(type))
                     yield return field.FieldType;
         }
 
-        public static void AddAssembly(Assembly assembly) => AssemblyList.Add(assembly);
+        public static void AddAssembly(Assembly assembly)
+        {
+            AssemblyList.Add(assembly);
+        }
 
-        public static IEnumerable<Assembly> GetAssemblys() => AssemblyList;
+        public static IEnumerable<Assembly> GetAssemblies()
+        {
+            return AssemblyList;
+        }
     }
 }

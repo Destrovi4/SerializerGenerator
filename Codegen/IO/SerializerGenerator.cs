@@ -1,10 +1,11 @@
-﻿using Destr.Codegen.Source;
-using Destr.IO;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using Destr.Codegen.Source;
+using Destr.IO;
+
 
 namespace Destr.Codegen
 {
@@ -14,11 +15,11 @@ namespace Destr.Codegen
         {
             foreach (Type type in CodeGenerator.GetTypes())
             {
-                Generated[] generateds = type.GetCustomAttributes<Generated>().ToArray();
-                Type serializer = type.GetInterfaces().Where(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(ISerializer<>)).FirstOrDefault();
-                if(generateds != null && generateds.Length > 0 && serializer != null)
+                Generated[] generatedTypes = type.GetCustomAttributes<Generated>().ToArray();
+                Type serializer = type.GetInterfaces().FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(ISerializer<>));
+                if (generatedTypes != null && generatedTypes.Length > 0 && serializer != null)
                 {
-                    foreach (var generated in generateds)
+                    foreach (var generated in generatedTypes)
                     {
                         var dataType = serializer.GetGenericArguments()[0];
                         Name = SimpleName(type);
@@ -28,12 +29,12 @@ namespace Destr.Codegen
                         Write(generated.File);
                     }
                 }
-                SerializerGarantedAttribute garanted = type.GetCustomAttribute<SerializerGarantedAttribute>();
-                if(garanted != null && Serializer.Get(type) == null)
+                SerializerGuaranteedAttribute guaranteed = type.GetCustomAttribute<SerializerGuaranteedAttribute>();
+                if (guaranteed != null && Serializer.Get(type) == null)
                 {
-                    string directory = Path.GetDirectoryName(garanted.File);
-                    string file = Path.GetFileNameWithoutExtension(garanted.File);
-                    string extension = Path.GetExtension(garanted.File);
+                    string directory = Path.GetDirectoryName(guaranteed.File);
+                    string file = Path.GetFileNameWithoutExtension(guaranteed.File);
+                    string extension = Path.GetExtension(guaranteed.File);
 
                     string newClassName = $"{SimpleName(type)}Serializer";
                     string generatedFileName = Path.Combine(directory, $"{newClassName}{extension}");
@@ -44,7 +45,6 @@ namespace Destr.Codegen
                     Make(type);
                     Write(generatedFileName);
                 }
-
             }
         }
 
@@ -62,19 +62,27 @@ namespace Destr.Codegen
 
             int index = 0;
             Dictionary<Type, string> serializerFieldByType = new Dictionary<Type, string>();
-            foreach (var field in FindSerializebleFields(type))
+            foreach (var field in FindSerializableFields(type))
             {
                 Type fieldType = field.FieldType;
                 string fieldName = field.Name;
 
-                if (fieldType == typeof(byte)) read.Add($"value.{fieldName} = reader.ReadByte();");
-                else if (fieldType == typeof(short)) read.Add($"value.{fieldName} = reader.ReadInt16();");
-                else if (fieldType == typeof(int)) read.Add($"value.{fieldName} = reader.ReadInt32();");
-                else if (fieldType == typeof(long)) read.Add($"value.{fieldName} = reader.ReadInt64();");
-                else if (fieldType == typeof(float)) read.Add($"value.{fieldName} = reader.ReadSingle();");
-                else if (fieldType == typeof(double)) read.Add($"value.{fieldName} = reader.ReadDouble();");
-                else if (fieldType == typeof(bool)) read.Add($"value.{fieldName} = reader.ReadBoolean();");
-                else if (fieldType == typeof(string)) read.Add($"value.{fieldName} = reader.ReadString();");
+                if (fieldType == typeof(byte))
+                    read.Add($"value.{fieldName} = reader.ReadByte();");
+                else if (fieldType == typeof(short))
+                    read.Add($"value.{fieldName} = reader.ReadInt16();");
+                else if (fieldType == typeof(int))
+                    read.Add($"value.{fieldName} = reader.ReadInt32();");
+                else if (fieldType == typeof(long))
+                    read.Add($"value.{fieldName} = reader.ReadInt64();");
+                else if (fieldType == typeof(float))
+                    read.Add($"value.{fieldName} = reader.ReadSingle();");
+                else if (fieldType == typeof(double))
+                    read.Add($"value.{fieldName} = reader.ReadDouble();");
+                else if (fieldType == typeof(bool))
+                    read.Add($"value.{fieldName} = reader.ReadBoolean();");
+                else if (fieldType == typeof(string))
+                    read.Add($"value.{fieldName} = reader.ReadString();");
                 else
                 {
                     if (!serializerFieldByType.TryGetValue(fieldType, out string serFieldName))
@@ -92,7 +100,14 @@ namespace Destr.Codegen
             }
         }
 
-        internal static bool IsSerializebleField(FieldInfo field) => !(field.IsStatic || field.IsPrivate);
-        internal static IEnumerable<FieldInfo> FindSerializebleFields(Type type) => type.GetFields().Where(IsSerializebleField);
+        internal static bool IsSerializableField(FieldInfo field)
+        {
+            return !(field.IsStatic || field.IsPrivate);
+        }
+
+        internal static IEnumerable<FieldInfo> FindSerializableFields(Type type)
+        {
+            return type.GetFields().Where(IsSerializableField);
+        }
     }
 }

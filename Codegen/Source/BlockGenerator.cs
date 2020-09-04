@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 
+
 namespace Destr.Codegen.Source
 {
     public class BlockGenerator : SourceGenerator
@@ -12,7 +13,10 @@ namespace Destr.Codegen.Source
             return this;
         }
 
-        public BlockGenerator Bordered => SetBordered(true);
+        public BlockGenerator Bordered
+        {
+            get => SetBordered(true);
+        }
 
         public BlockGenerator AddBlock()
         {
@@ -21,7 +25,10 @@ namespace Destr.Codegen.Source
             return block;
         }
 
-        public BlockGenerator Block => AddBlock();
+        public BlockGenerator Block
+        {
+            get => AddBlock();
+        }
 
         public SwitchSourceGenerator AddSwitch()
         {
@@ -42,14 +49,12 @@ namespace Destr.Codegen.Source
             if (isBordered)
             {
                 yield return "{";
-                foreach (var line in base.GetSourceLines())
-                    yield return $"{Space}{line}";
+                foreach (var line in base.GetSourceLines()) yield return $"{Space}{line}";
                 yield return "}";
             }
             else
             {
-                foreach (var line in base.GetSourceLines())
-                    yield return line;
+                foreach (var line in base.GetSourceLines()) yield return line;
             }
         }
     }

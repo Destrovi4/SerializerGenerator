@@ -1,6 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
+
 
 namespace Destr.Codegen.Source
 {
@@ -21,7 +20,10 @@ namespace Destr.Codegen.Source
             return this;
         }
 
-        public CaseSourceGenerator Default => SetDefault(true);
+        public CaseSourceGenerator Default
+        {
+            get => SetDefault(true);
+        }
 
         public CaseSourceGenerator SetBreak(bool value)
         {
@@ -29,22 +31,24 @@ namespace Destr.Codegen.Source
             return this;
         }
 
-        public CaseSourceGenerator Break => SetBreak(true);
+        public CaseSourceGenerator Break
+        {
+            get => SetBreak(true);
+        }
 
         public override IEnumerable<string> GetSourceLines()
         {
             if (isDefault)
                 yield return "default:";
-            else 
+            else
                 yield return $"case {string.Join("", Header.GetSourceLines())}:";
-            if(isBordered)
+            if (isBordered)
                 foreach (var line in base.GetSourceLines())
                     yield return line;
             else
                 foreach (var line in base.GetSourceLines())
-                        yield return $"{Space}{line}";
-            if(isBreak)
-                yield return "break;";
+                    yield return $"{Space}{line}";
+            if (isBreak) yield return "break;";
         }
     }
 }

@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
+
 namespace Destr.Codegen.Source
 {
     public class SourceGenerator
@@ -27,7 +28,7 @@ namespace Destr.Codegen.Source
             return this;
         }
 
-        public SourceGenerator Add(IEnumerable<string> src) 
+        public SourceGenerator Add(IEnumerable<string> src)
         {
             _sources.Add(src);
             return this;
@@ -63,7 +64,7 @@ namespace Destr.Codegen.Source
         {
             Require(type);
             Require(args);
-            if(args == null)
+            if (args == null)
                 _sources.Add($"{SimpleName(type)}");
             else
                 _sources.Add($"{SimpleName(type)}<{string.Join(",", args.Select(RealTypeName))}>");
@@ -90,7 +91,10 @@ namespace Destr.Codegen.Source
             return generator;
         }
 
-        public LineSourceGenerator Line => AddLine();
+        public LineSourceGenerator Line
+        {
+            get => AddLine();
+        }
 
         public SourceGenerator Require<T>()
         {
@@ -103,7 +107,7 @@ namespace Destr.Codegen.Source
             _dependence.Add(type);
             return this;
         }
-        
+
         public SourceGenerator Require(IEnumerable<Type> type)
         {
             _dependence.Add(type);
@@ -126,18 +130,17 @@ namespace Destr.Codegen.Source
         {
             foreach (var type in ExtractTypes(_dependence))
             {
-                if(type.IsGenericType)
+                if (type.IsGenericType)
                 {
-                    foreach (var arg in type.GetGenericArguments())
-                        yield return arg;
+                    foreach (var arg in type.GetGenericArguments()) yield return arg;
                 }
                 yield return type;
             }
         }
 
-        public virtual IEnumerable<string> GetSourceLines() {
-            foreach(var line in ExtractString(_sources))
-                yield return line;
+        public virtual IEnumerable<string> GetSourceLines()
+        {
+            foreach (var line in ExtractString(_sources)) yield return line;
         }
 
         protected IEnumerable<T> Extract<T>(object obj, Func<object, IEnumerable<T>> other = null)
@@ -151,8 +154,7 @@ namespace Destr.Codegen.Source
 
             if (obj is Func<object>)
             {
-                foreach (var t in Extract<T>((obj as Func<object>)(), other))
-                    yield return t;
+                foreach (var t in Extract<T>((obj as Func<object>)(), other)) yield return t;
                 yield break;
             }
             /*
@@ -166,8 +168,7 @@ namespace Destr.Codegen.Source
             */
             if (obj is IEnumerable<T>)
             {
-                foreach (var t in obj as IEnumerable<T>)
-                    yield return t;
+                foreach (var t in obj as IEnumerable<T>) yield return t;
                 yield break;
             }
 
@@ -179,12 +180,15 @@ namespace Destr.Codegen.Source
                 yield break;
             }
 
-            if(other != null)
-                foreach(var t in other(obj))
+            if (other != null)
+                foreach (var t in other(obj))
                     yield return t;
         }
 
-        protected IEnumerable<string> ExtractString(object obj) => Extract(obj, OtherStringSources);
+        protected IEnumerable<string> ExtractString(object obj)
+        {
+            return Extract(obj, OtherStringSources);
+        }
 
         protected IEnumerable<string> OtherStringSources(object obj)
         {
@@ -194,7 +198,10 @@ namespace Destr.Codegen.Source
             yield break;
         }
 
-        protected IEnumerable<Type> ExtractTypes(object obj) => Extract(obj, OtherTypeSources);
+        protected IEnumerable<Type> ExtractTypes(object obj)
+        {
+            return Extract(obj, OtherTypeSources);
+        }
 
         protected IEnumerable<Type> OtherTypeSources(object obj)
         {
@@ -232,8 +239,7 @@ namespace Destr.Codegen.Source
         public void Write(string path)
         {
 #if PRINT_TO_FILE
-            using (var writer = new StreamWriter(path))
-                Write(writer);
+            using (var writer = new StreamWriter(path)) Write(writer);
 #else
             Console.Out.WriteLine($"{nameof(path)}: {path}");
             Write(Console.Out);
@@ -243,8 +249,7 @@ namespace Destr.Codegen.Source
 
         public void Write(TextWriter writer)
         {
-            foreach (var line in GetSourceLines())
-                writer.WriteLine(line);
+            foreach (var line in GetSourceLines()) writer.WriteLine(line);
         }
     }
 }

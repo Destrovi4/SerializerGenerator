@@ -1,12 +1,13 @@
-﻿using Destr.Codegen;
-using Destr.Codegen.Source;
-using Destr.IO;
-using Destr.Protocol;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using Destr.Codegen;
+using Destr.Codegen.Source;
+using Destr.IO;
+using Destr.Protocol;
+
 
 namespace Assets.SerializerGenerator.Codegen.Net
 {
@@ -16,12 +17,9 @@ namespace Assets.SerializerGenerator.Codegen.Net
         {
             foreach (Type type in CodeGenerator.GetTypes())
             {
-                if (type.IsInterface)
-                    continue;
-                if (type.IsAbstract)
-                    continue;
-                if (type.FindGenericInterface(typeof(ICachedPacketWriter<>)) == null)
-                    continue;
+                if (type.IsInterface) continue;
+                if (type.IsAbstract) continue;
+                if (type.FindGenericInterface(typeof(ICachedPacketWriter<>)) == null) continue;
 
                 Name = SimpleName(type);
                 Namespace = type.Namespace;
@@ -29,8 +27,7 @@ namespace Assets.SerializerGenerator.Codegen.Net
                 foreach (var generated in type.GetCustomAttributes<Generated>())
                 {
                     Type generatedInterface = generated?.Argument ?? type.FindGenericInterface(typeof(ICachedPacketWriter<>));
-                    if (generatedInterface == null || generatedInterface.GetGenericTypeDefinition() != typeof(ICachedPacketWriter<>))
-                        continue;
+                    if (generatedInterface == null || generatedInterface.GetGenericTypeDefinition() != typeof(ICachedPacketWriter<>)) continue;
                     Clear();
                     Attributes.Add(generated);
                     SetPartial(generated.IsPartial);
@@ -47,13 +44,10 @@ namespace Assets.SerializerGenerator.Codegen.Net
             List<Type> packetTypeList = new List<Type>();
             foreach (Type packetType in CodeGenerator.GetTypes())
             {
-                if (packetType.IsInterface || packetType.IsAbstract)
-                    continue;
+                if (packetType.IsInterface || packetType.IsAbstract) continue;
                 Type packetGenericInterface = packetType.FindGenericInterface(typeof(IPacket<>));
-                if (packetGenericInterface == null)
-                    continue;
-                if (packetGenericInterface.GetGenericArguments()[0] != protocol)
-                    continue;
+                if (packetGenericInterface == null) continue;
+                if (packetGenericInterface.GetGenericArguments()[0] != protocol) continue;
                 packetTypeList.Add(packetType);
             }
 
@@ -82,7 +76,7 @@ namespace Assets.SerializerGenerator.Codegen.Net
                 var specializedSend = AddMethod("SendPacket").Public.Void;
                 specializedSend.Argument.In.Add(packetType).Add("packet");
                 specializedSend.AddLine($"{queueField}.Enqueue(packet);");
-                specializedSend.AddLine("OnPacketSended();");
+                specializedSend.AddLine("OnPacketSent();");
 
                 id++;
             }
@@ -92,10 +86,11 @@ namespace Assets.SerializerGenerator.Codegen.Net
             sendMethod.Where.Line.Add("D : ").Add(packetInterface);
             sendMethod.Line.Add("throw new ").Add<Exception>().Add("();");
 
-            Methods.Add("partial void OnPacketSended();");
+            Methods.Add("partial void OnPacketSent();");
         }
     }
 }
+
 
 /*
  public void Send(in UserCommand packet)

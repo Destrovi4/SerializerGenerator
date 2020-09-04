@@ -1,5 +1,6 @@
 ﻿using System.IO;
 
+
 namespace Destr.IO
 {
     public interface ISerializer<T> where T : struct

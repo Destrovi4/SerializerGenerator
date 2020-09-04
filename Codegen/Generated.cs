@@ -1,6 +1,6 @@
-﻿using Assets.SerializerGenerator.Codegen;
-using System;
+﻿using System;
 using System.Runtime.CompilerServices;
+
 
 namespace Destr.Codegen
 {
@@ -12,6 +12,7 @@ namespace Destr.Codegen
         public readonly int Line;
         public readonly Type Argument;
         public readonly bool IsPartial;
+
         public Generated
         (
             Type argument = null,
@@ -27,6 +28,9 @@ namespace Destr.Codegen
             IsPartial = isPartial;
         }
 
-        public override string ToString() { return File + "(" + Line + "):" + Member; }
+        public override string ToString()
+        {
+            return $"{File}({Line}):{Member}";
+        }
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
+
 namespace Destr.Codegen.Source
 {
     public class ClassSourceGenerator : SourceGenerator
@@ -29,7 +30,7 @@ namespace Destr.Codegen.Source
             Require(Fields);
             Require(Methods);
 
-            Add(Usings);
+            Add(Using);
             Add(GenerateClassWithNamespace);
         }
 
@@ -49,7 +50,10 @@ namespace Destr.Codegen.Source
             return this;
         }
 
-        public ClassSourceGenerator Public => SetPublic(true);
+        public ClassSourceGenerator Public
+        {
+            get => SetPublic(true);
+        }
 
         public ClassSourceGenerator SetPartial(bool isPartial)
         {
@@ -57,7 +61,10 @@ namespace Destr.Codegen.Source
             return this;
         }
 
-        public ClassSourceGenerator Partial => SetPartial(true);
+        public ClassSourceGenerator Partial
+        {
+            get => SetPartial(true);
+        }
 
         public MethodGenerator AddMethod(string name)
         {
@@ -66,7 +73,7 @@ namespace Destr.Codegen.Source
             return method;
         }
 
-        private IEnumerable<string> Usings()
+        private IEnumerable<string> Using()
         {
             HashSet<string> namespaces = new HashSet<string>();
             foreach (var usingType in Dependence())
@@ -82,15 +89,13 @@ namespace Destr.Codegen.Source
         {
             if (string.IsNullOrWhiteSpace(Namespace))
             {
-                foreach (var line in GenerateClass(""))
-                    yield return line;
+                foreach (var line in GenerateClass("")) yield return line;
             }
             else
             {
                 yield return $"namespace {Namespace}";
                 yield return "{";
-                foreach (var line in GenerateClass($"{Space}"))
-                    yield return line;
+                foreach (var line in GenerateClass($"{Space}")) yield return line;
                 yield return "}";
             }
         }
@@ -98,38 +103,30 @@ namespace Destr.Codegen.Source
         private IEnumerable<string> GenerateClass(string offset)
         {
             var attributes = Attributes.GetSourceLines().ToArray();
-            if (attributes.Length != 0)
-                yield return $"{offset}[{string.Join(", ", attributes)}]";
-            yield return string.Join(" ", GenerateClassDifinition(offset));
+            if (attributes.Length != 0) yield return $"{offset}[{string.Join(", ", attributes)}]";
+            yield return string.Join(" ", GenerateClassDefinition(offset));
             yield return $"{offset}{{";
-            foreach (var line in GenerateClassBody($"{offset}{Space}"))
-                yield return line;
+            foreach (var line in GenerateClassBody($"{offset}{Space}")) yield return line;
             yield return $"{offset}}}";
         }
 
-        private IEnumerable<string> GenerateClassDifinition(string offset)
+        private IEnumerable<string> GenerateClassDefinition(string offset)
         {
             yield return offset;
-            if (_isPublic)
-                yield return "public";
-            if (_isPartial)
-                yield return "partial";
+            if (_isPublic) yield return "public";
+            if (_isPartial) yield return "partial";
             yield return "class";
             yield return Name;
             var extends = Extends.GetSourceLines().ToArray();
-            if(extends.Length == 0)
-                yield break;
+            if (extends.Length == 0) yield break;
             yield return ":";
             yield return string.Join(",", extends);
         }
 
         protected IEnumerable<string> GenerateClassBody(string offset)
         {
-            foreach (var line in Fields.GetSourceLines())
-                yield return $"{offset}{line}";
-            foreach (var line in Methods.GetSourceLines())
-                yield return $"{offset}{line}";
+            foreach (var line in Fields.GetSourceLines()) yield return $"{offset}{line}";
+            foreach (var line in Methods.GetSourceLines()) yield return $"{offset}{line}";
         }
-
     }
 }

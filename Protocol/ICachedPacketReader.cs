@@ -1,5 +1,6 @@
 ﻿using System.IO;
 
+
 namespace Destr.Protocol
 {
     public interface ICachedPacketReader<T> where T : IProtocol<T>

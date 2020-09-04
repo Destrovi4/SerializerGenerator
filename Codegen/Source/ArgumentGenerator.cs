@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 
+
 namespace Destr.Codegen.Source
 {
     public class ArgumentGenerator : SourceGenerator
@@ -13,7 +14,10 @@ namespace Destr.Codegen.Source
             return this;
         }
 
-        public ArgumentGenerator In => SetIn(true);
+        public ArgumentGenerator In
+        {
+            get => SetIn(true);
+        }
 
         public ArgumentGenerator SetOut(bool value)
         {
@@ -21,7 +25,10 @@ namespace Destr.Codegen.Source
             return this;
         }
 
-        public ArgumentGenerator Out => SetOut(true);
+        public ArgumentGenerator Out
+        {
+            get => SetOut(true);
+        }
 
         public ArgumentGenerator Ref
         {
@@ -44,10 +51,8 @@ namespace Destr.Codegen.Source
                 yield return "ref";
             else if (isIn)
                 yield return "in";
-            else if (isOut)
-                yield return "out";
-            foreach (var line in base.GetSourceLines())
-                yield return line;
+            else if (isOut) yield return "out";
+            foreach (var line in base.GetSourceLines()) yield return line;
         }
     }
 }

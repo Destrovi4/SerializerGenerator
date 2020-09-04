@@ -1,12 +1,13 @@
-﻿using Destr.Codegen.Source;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using Assets.SerializerGenerator.Codegen;
+using Destr.Codegen.Source;
 using Destr.IO;
 using Destr.Protocol;
-using Assets.SerializerGenerator.Codegen;
+
 
 namespace Destr.Codegen
 {
@@ -19,15 +20,11 @@ namespace Destr.Codegen
         {
             foreach (Type type in CodeGenerator.GetTypes())
             {
-                if (type.IsInterface)
-                    continue;
-                if (type.IsAbstract)
-                    continue;
-                if (type.FindGenericInterface(typeof(IProtocol<>)) == null)
-                    continue;
+                if (type.IsInterface) continue;
+                if (type.IsAbstract) continue;
+                if (type.FindGenericInterface(typeof(IProtocol<>)) == null) continue;
                 var generated = type.GetCustomAttribute<Generated>();
-                if (generated == null)
-                    continue;
+                if (generated == null) continue;
 
                 Name = SimpleName(type);
                 Namespace = type.Namespace;
@@ -48,11 +45,11 @@ namespace Destr.Codegen
                     .Where(i => i.IsGenericType)
                     .Where(i => i.GetGenericTypeDefinition() == typeof(IPacket<>))
                     .Any(i => i.GetGenericArguments()[0] == type)
-                ).ToArray();
+                )
+                .ToArray();
 
             Dictionary<Type, string> descriptionByType = new Dictionary<Type, string>();
-            foreach (var packageType in packageTypes)
-                descriptionByType.Add(packageType, Serializer.Defenition(packageType));
+            foreach (var packageType in packageTypes) descriptionByType.Add(packageType, Serializer.Definition(packageType));
 
             packageTypes.OrderBy(t => descriptionByType[t]);
 
@@ -65,13 +62,17 @@ namespace Destr.Codegen
             Fields.AddLine("private static readonly Dictionary<Type, uint> _packetIdByType = new Dictionary<Type, uint>();");
 
 
-            AddMethod("Read").Public.Void.AddArgument<BinaryReader>("reader")
+            AddMethod("Read")
+                .Public.Void.AddArgument<BinaryReader>("reader")
                 .AddLine($"{ReadingDescriptor}[reader.ReadUInt16()].Invoke(reader);");
-            var abstractWriter = AddMethod("Write<D>").Public.Void.AddArgument<BinaryWriter>("writer").AddArgument("in D data")//.AddWhere("D : struct")
+            var abstractWriter = AddMethod("Write<D>")
+                .Public.Void.AddArgument<BinaryWriter>("writer")
+                .AddArgument("in D data") //.AddWhere("D : struct")
                 .AddWhere($"D : struct, IPacket<{SimpleName(type)}>")
                 .AddLine($"(_descriptorWrite[_packetIdByType[typeof(D)]] as writer<D>)(writer, in data);");
 
-            var listen = AddMethod("Listen<D>").Public.Void.AddArgument($"PacketListener<{Name}, D> listener")
+            var listen = AddMethod("Listen<D>")
+                .Public.Void.AddArgument($"PacketListener<{Name}, D> listener")
                 .AddWhere($"D : struct, IPacket<{SimpleName(type)}>");
             var listenSwitch = listen.AddSwitch("_packetIdByType[typeof(D)]");
             listenSwitch.Case.Default.Add("throw new Exception();");
@@ -122,6 +123,7 @@ namespace Destr.Codegen
         }
     }
 }
+
 
 /*
         public readonly string Defenition;

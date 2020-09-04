@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
+
 namespace Destr.Codegen.Source
 {
     public class MethodGenerator : BlockGenerator
@@ -29,7 +30,10 @@ namespace Destr.Codegen.Source
             return this;
         }
 
-        public MethodGenerator Static => SetStatic(true);
+        public MethodGenerator Static
+        {
+            get => SetStatic(true);
+        }
 
         public MethodGenerator SetPublic(bool value)
         {
@@ -37,7 +41,10 @@ namespace Destr.Codegen.Source
             return this;
         }
 
-        public MethodGenerator Public => SetPublic(true);
+        public MethodGenerator Public
+        {
+            get => SetPublic(true);
+        }
 
         public MethodGenerator SetPrivate(bool value)
         {
@@ -45,7 +52,10 @@ namespace Destr.Codegen.Source
             return this;
         }
 
-        public MethodGenerator Private => SetPrivate(true);
+        public MethodGenerator Private
+        {
+            get => SetPrivate(true);
+        }
 
         public MethodGenerator SetOverride(bool value)
         {
@@ -53,7 +63,10 @@ namespace Destr.Codegen.Source
             return this;
         }
 
-        public MethodGenerator Override => SetOverride(true);
+        public MethodGenerator Override
+        {
+            get => SetOverride(true);
+        }
 
         public MethodGenerator Return(string returnType)
         {
@@ -75,7 +88,10 @@ namespace Destr.Codegen.Source
             return this;
         }
 
-        public MethodGenerator Void => Return(null as Type);
+        public MethodGenerator Void
+        {
+            get => Return(null as Type);
+        }
 
         public MethodGenerator Return<T>()
         {
@@ -96,8 +112,11 @@ namespace Destr.Codegen.Source
             return generator;
         }
 
-        public ArgumentGenerator Argument => MakeArgument();
-        
+        public ArgumentGenerator Argument
+        {
+            get => MakeArgument();
+        }
+
         public MethodGenerator AddArgument(string name, Type type)
         {
             Arguments.AddLine().Add(type).Add($" {name}");
@@ -110,7 +129,10 @@ namespace Destr.Codegen.Source
             return this;
         }
 
-        public MethodGenerator AddArgument<T>(string name) => AddArgument(name, typeof(T));
+        public MethodGenerator AddArgument<T>(string name)
+        {
+            return AddArgument(name, typeof(T));
+        }
 
         public MethodGenerator AddWhere(string line)
         {
@@ -120,27 +142,21 @@ namespace Destr.Codegen.Source
 
         public override IEnumerable<string> GetSourceLines()
         {
-            yield return string.Join("", GenerateMethodDifinition());
-            foreach (var line in base.GetSourceLines())
-                yield return line;
+            yield return string.Join("", GenerateMethodDefinition());
+            foreach (var line in base.GetSourceLines()) yield return line;
         }
 
-        private IEnumerable<string> GenerateMethodDifinition()
+        private IEnumerable<string> GenerateMethodDefinition()
         {
-            if (isStatic)
-                yield return "static ";
-            if (isPublic)
-                yield return "public ";
-            if (isPrivate)
-                yield return "private ";
-            if (isOverride)
-                yield return "override ";
-            if (!string.IsNullOrEmpty(ReturnType))
-                yield return $"{ReturnType} ";
+            if (isStatic) yield return "static ";
+            if (isPublic) yield return "public ";
+            if (isPrivate) yield return "private ";
+            if (isOverride) yield return "override ";
+            if (!string.IsNullOrEmpty(ReturnType)) yield return $"{ReturnType} ";
             yield return Name;
             yield return $"({string.Join(", ", Arguments.GetSourceLines())})";
             var wheres = Where.GetSourceLines().ToArray();
-            if(wheres.Length > 0)
+            if (wheres.Length > 0)
                 foreach (var line in wheres)
                     yield return $" where {line}";
         }

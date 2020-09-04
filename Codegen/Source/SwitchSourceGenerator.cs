@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using System.Text;
+﻿using System.Collections.Generic;
+
 
 namespace Destr.Codegen.Source
 {
@@ -29,13 +27,15 @@ namespace Destr.Codegen.Source
             return caseGenerator;
         }
 
-        public CaseSourceGenerator Case => AddCase();
+        public CaseSourceGenerator Case
+        {
+            get => AddCase();
+        }
 
         public override IEnumerable<string> GetSourceLines()
         {
             yield return $"switch({string.Join("", Header.GetSourceLines())})";
-            foreach (var line in base.GetSourceLines())
-                yield return line;
+            foreach (var line in base.GetSourceLines()) yield return line;
         }
     }
 }

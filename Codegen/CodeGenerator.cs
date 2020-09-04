@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
+
 namespace Destr.Codegen
 {
     public interface ICodeGenerator
@@ -10,9 +11,11 @@ namespace Destr.Codegen
         void Generate();
     }
 
+
     public abstract class CodeGenerator
     {
         private static readonly HashSet<Assembly> AssemblyList = new HashSet<Assembly>();
+
         static CodeGenerator()
         {
             AssemblyList.Add(Assembly.GetExecutingAssembly());
@@ -21,18 +24,26 @@ namespace Destr.Codegen
         public static void Generate()
         {
             var generators = AssemblyList
-                .SelectMany(a=> a.GetTypes())
+                .SelectMany(a => a.GetTypes())
                 .Where(t => !t.IsAbstract)
                 .Where(t => t.GetInterfaces().Any(i => i == typeof(ICodeGenerator)))
                 .Select(t => Activator.CreateInstance(t) as ICodeGenerator);
-            foreach(var generate in generators)
-                generate.Generate();
+            foreach (var generate in generators) generate.Generate();
         }
 
-        public static void AddAssembly(Assembly assembly) => AssemblyList.Add(assembly);
+        public static void AddAssembly(Assembly assembly)
+        {
+            AssemblyList.Add(assembly);
+        }
 
-        public static IEnumerable<Assembly> GetAssemblys() => AssemblyList;
+        public static IEnumerable<Assembly> GetAssemblies()
+        {
+            return AssemblyList;
+        }
 
-        public static IEnumerable<Type> GetTypes() => GetAssemblys().SelectMany(a => a.GetTypes());
+        public static IEnumerable<Type> GetTypes()
+        {
+            return GetAssemblies().SelectMany(a => a.GetTypes());
+        }
     }
 }
