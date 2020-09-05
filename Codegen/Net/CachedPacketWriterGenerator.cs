@@ -3,17 +3,22 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using Destr.Codegen;
 using Destr.Codegen.Source;
 using Destr.IO;
 using Destr.Protocol;
 
 
-namespace Assets.SerializerGenerator.Codegen.Net
+namespace Destr.Codegen
 {
-    public class CachedPacketWriterGenerator : ClassSourceGenerator, ICodeGenerator
+    public class CachedPacketWriterGenerator : ClassSourceGenerator
     {
-        public void Generate()
+        [CodegenMethod]
+        public static void Generate()
+        {
+            new CachedPacketWriterGenerator().MakeAll();
+        }
+
+        public void MakeAll()
         {
             foreach (Type type in CodeGenerator.GetTypes())
             {
@@ -90,36 +95,3 @@ namespace Assets.SerializerGenerator.Codegen.Net
         }
     }
 }
-
-
-/*
- public void Send(in UserCommand packet)
-        {
-            _0UserCommandQueue.Enqueue(packet);
-        }
- * */
-
-/*
- public void Write(BinaryWriter writer)
-        {
-            while(_0UserCommandQueue.TryDequeue(out var p0))
-            {
-                writer.Write(_0UserCommandId);
-                _0UserCommandSerializer.Write(writer, in p0);
-            }
-        }
-        */
-
-/*
-public void Send<D>(in D packet) where D : IPacket<ClientServerProtocol>
-        {
-            throw new Exception();
-        }
-        */
-
-
-/*
-private const ushort _0UserCommandId = 0;
-private static ISerializer<UserCommand> _0UserCommandSerializer = null;
-private readonly ConcurrentQueue<UserCommand> _0UserCommandQueue = new ConcurrentQueue<UserCommand>();
-*/

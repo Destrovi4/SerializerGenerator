@@ -3,17 +3,21 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using Destr.Codegen;
 using Destr.Codegen.Source;
 using Destr.IO;
 using Destr.Protocol;
 
-
-namespace Assets.SerializerGenerator.Codegen.Net
+namespace Destr.Codegen
 {
-    public class CachedPacketReaderGenerator : ClassSourceGenerator, ICodeGenerator
+    public class CachedPacketReaderGenerator : ClassSourceGenerator
     {
-        public void Generate()
+        [CodegenMethod]
+        public static void Generate()
+        {
+            new CachedPacketReaderGenerator().MakeAll();
+        }
+
+        public void MakeAll()
         {
             foreach (Type type in CodeGenerator.GetTypes())
             {

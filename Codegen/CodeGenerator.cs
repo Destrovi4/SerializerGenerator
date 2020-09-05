@@ -6,31 +6,19 @@ using System.Reflection;
 
 namespace Destr.Codegen
 {
-
-    public interface ICodeGenerator
+    [AttributeUsage(AttributeTargets.Method)]
+    public class CodegenMethod : Attribute
     {
-        void Generate();
     }
-
 
     public abstract class CodeGenerator
     {
         private static readonly HashSet<Assembly> AssemblyList = new HashSet<Assembly>();
-        private static HashSet<Type> _usedTypes = null;
+        private static HashSet<Type> _usedTypes = new HashSet<Type>();
 
         static CodeGenerator()
         {
             AssemblyList.Add(Assembly.GetExecutingAssembly());
-        }
-
-        public static void Generate()
-        {
-            var generators = AssemblyList
-                .SelectMany(a => a.GetTypes())
-                .Where(t => !t.IsAbstract)
-                .Where(t => t.GetInterfaces().Any(i => i == typeof(ICodeGenerator)))
-                .Select(t => Activator.CreateInstance(t) as ICodeGenerator);
-            foreach (var generate in generators) generate.Generate();
         }
 
         public static void AddAssembly(Assembly assembly)
@@ -48,23 +36,44 @@ namespace Destr.Codegen
             return GetAssemblies().SelectMany(a => a.GetTypes());
         }
 
-        public static IEnumerable<Type> GetUsedTypes()
+        public static void Generate()
         {
-            if(_usedTypes == null)
+            List<Delegate> generationMethods = new List<Delegate>();
+
+            foreach(var type in GetTypes())
             {
-                _usedTypes = new HashSet<Type>();
-                foreach(var type in GetTypes()
-                    .SelectMany(t=>t.GetRuntimeMethods())
-                    .Select(m=>m.GetMethodBody())
-                    .Where(b=>b!=null && b.LocalVariables != null)
-                    .SelectMany(b=>b.LocalVariables)
-                    .Select(v=>v.LocalType)
-                    .Where(t=>!t.IsGenericType || !t.GetGenericArguments().Any(a=>a == null))
-                    )
+                foreach(var method in type.GetRuntimeMethods())
                 {
-                    _usedTypes.Add(type);
+                    var methodBody = method.GetMethodBody();
+                    if (methodBody != null)
+                    {
+                        foreach (var localType in methodBody.LocalVariables
+                            .Select(v=>v.LocalType)
+                            .Where(t=>!t.ContainsGenericParameters))
+                        {
+                            _usedTypes.Add(localType);
+                        }
+                    }
+
+                    var methodAttributes = method.GetCustomAttributes();
+                    foreach(var methodAttribute in methodAttributes)
+                    {
+                        if(methodAttribute is CodegenMethod)
+                        {
+                            generationMethods.Add(method.CreateDelegate(typeof(Action)));
+                        }
+                    }
                 }
             }
+
+            foreach(var generationMethod in generationMethods)
+            {
+                generationMethod.DynamicInvoke();
+            }
+        }
+
+        public static IEnumerable<Type> GetUsedTypes()
+        {
             return _usedTypes;
         }
     }

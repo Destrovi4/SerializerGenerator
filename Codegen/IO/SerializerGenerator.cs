@@ -3,30 +3,50 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using Destr.Codegen.Source;
 using Destr.IO;
 
 
 namespace Destr.Codegen
 {
-    public class SerializerGenerator : ClassSourceGenerator, ICodeGenerator
+    public class SerializerGenerator : ClassSourceGenerator
     {
-        public void Generate()
+        private struct GenerationTask
         {
+            public string file;
+            public string name;
+            public string classNamespace;
+            public Type dataType;
+        }
+
+        private static HashSet<Type> _hasSerializer = new HashSet<Type>();
+        
+        private HashSet<Type> _requiredSerializerSet = new HashSet<Type>();
+
+        [CodegenMethod]
+        public static void GenerateSerializers()
+        {
+            Queue<GenerationTask> generationTaskQueue = new Queue<GenerationTask>();
+            var garantedList = new List<(SerializerGuaranteedAttribute, Type)>();
             foreach (Type type in CodeGenerator.GetTypes())
             {
+                Type baseSerializer = type.GetInterfaces().FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(ISerializer<>));
                 Generated[] generatedTypes = type.GetCustomAttributes<Generated>().ToArray();
-                Type serializer = type.GetInterfaces().FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(ISerializer<>));
-                if (generatedTypes != null && generatedTypes.Length > 0 && serializer != null)
+                if (generatedTypes != null && generatedTypes.Length > 0)
                 {
-                    foreach (var generated in generatedTypes)
+                    foreach (Generated generated in generatedTypes)
                     {
-                        var dataType = serializer.GetGenericArguments()[0];
-                        Name = SimpleName(type);
-                        Namespace = type.Namespace;
-                        Clear();
-                        Make(dataType);
-                        Write(generated.File);
+                        Type serializer = generated?.Argument ?? baseSerializer;
+                        if (serializer.GetGenericTypeDefinition() != typeof(ISerializer<>))
+                            continue;
+                        Type dataType = serializer.GetGenericArguments()[0];
+                        generationTaskQueue.Enqueue(new GenerationTask() {
+                            file = generated.File,
+                            name = SimpleName(type),
+                            classNamespace = type.Namespace,
+                            dataType = dataType
+                        });
                     }
                 }
                 SerializerGuaranteedAttribute guaranteed = type.GetCustomAttribute<SerializerGuaranteedAttribute>();
@@ -36,16 +56,71 @@ namespace Destr.Codegen
                     string file = Path.GetFileNameWithoutExtension(guaranteed.File);
                     string extension = Path.GetExtension(guaranteed.File);
 
-                    string newClassName = $"{SimpleName(type)}Serializer";
-                    string generatedFileName = Path.Combine(directory, $"{newClassName}{extension}");
+                    var attr = CodeGenerator.GetUsedTypes().Where(t => t.IsGenericType).ToArray();
+                    if (type.IsGenericType && type.GetGenericArguments().All(a=>a.IsGenericParameter))
+                    {
+                        foreach(Type usedType in CodeGenerator.GetUsedTypes().Where(t=>t.IsGenericType && t.GetGenericTypeDefinition() == type.GetGenericTypeDefinition()))
+                        {
+                            string newUsedClassName = $"{SinpleGenericName(usedType)}Serializer";
+                            generationTaskQueue.Enqueue(new GenerationTask()
+                            {
+                                file = Path.Combine(directory, $"{newUsedClassName}{extension}"),
+                                name = newUsedClassName,
+                                classNamespace = type.Namespace,
+                                dataType = usedType
+                            });
+                        }
+                        continue;
+                    }
 
-                    Name = newClassName;
-                    Namespace = type.Namespace;
-                    Clear();
-                    Make(type);
-                    Write(generatedFileName);
+                    string newClassName = $"{SimpleName(type)}Serializer";
+
+                    generationTaskQueue.Enqueue(new GenerationTask() {
+                        file = Path.Combine(directory, $"{newClassName}{extension}"),
+                        name = newClassName,
+                        classNamespace = type.Namespace,
+                        dataType = type
+                    });
                 }
             }
+            var generator = new SerializerGenerator();
+            while (generationTaskQueue.Count > 0)
+            {
+                var task = generationTaskQueue.Dequeue();
+                if (_hasSerializer.Contains(task.dataType))
+                    continue;
+                _hasSerializer.Add(task.dataType);
+                generator.Clear();
+                generator.Make(task);
+
+                var path = Path.GetDirectoryName(task.file);
+                string extension = Path.GetExtension(task.file);
+                foreach (Type requiredType in generator._requiredSerializerSet)
+                {
+                    var className = $"{SimpleName(requiredType)}Serializer";
+                    generationTaskQueue.Enqueue(new GenerationTask() {
+                        file = Path.Combine(path, $"{className}{extension}"),
+                        name = className,
+                        classNamespace = requiredType.Namespace,
+                        dataType = requiredType
+                    });
+                }
+            }
+        }
+
+        public override void Clear()
+        {
+            _requiredSerializerSet.Clear();
+            base.Clear();
+        }
+
+        private void Make(GenerationTask task)
+        {
+            Clear();
+            Name = task.name;
+            Namespace = task.classNamespace;
+            Make(task.dataType);
+            Write(task.file);
         }
 
         public void Make(Type type)
@@ -90,6 +165,7 @@ namespace Destr.Codegen
                         serFieldName = $"_ser{index++}{SimpleName(fieldType)}";
                         serializerFieldByType.Add(fieldType, serFieldName);
                         Fields.Line.Add("private static ").Add(typeof(ISerializer<>), fieldType).Add($" {serFieldName} = null;");
+                        _requiredSerializerSet.Add(fieldType);
                     }
                     read.Line.Add($"{serFieldName}.Read(reader, out value.{fieldName});");
                     write.Line.Add($"{serFieldName}.Write(writer, in value.{fieldName});");

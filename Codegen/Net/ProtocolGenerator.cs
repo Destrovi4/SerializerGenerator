@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using Assets.SerializerGenerator.Codegen;
 using Destr.Codegen.Source;
 using Destr.IO;
 using Destr.Protocol;
@@ -12,7 +10,7 @@ using Destr.Protocol;
 
 namespace Destr.Codegen
 {
-    public class ProtocolSourceGenerator : ClassSourceGenerator, ICodeGenerator
+    public class ProtocolSourceGenerator : ClassSourceGenerator
     {
         private const string ReadingDescriptor = "_descriptorRead";
         private const string WritingDescriptor = "_descriptorWrite";

@@ -2,7 +2,7 @@
 using System.Linq;
 
 
-namespace Assets.SerializerGenerator.Codegen
+namespace Destr.Codegen
 {
     public static class TypeUtil
     {

@@ -235,24 +235,30 @@ namespace Destr.Codegen.Source
             return name.Substring(0, name.IndexOf('`'));
         }
 
+        public static string SinpleGenericName(Type type)
+        {
+            StringBuilder stringBuilder = new StringBuilder(SimpleName(type));
+            foreach(Type arg in type.GetGenericArguments())
+            {
+                stringBuilder.Append(arg.IsGenericType ? SinpleGenericName(arg) : SimpleName(arg));
+            }
+            return stringBuilder.ToString();
+        }
 
         public void Write(string path)
         {
 #if PRINT_TO_FILE
-            using (var writer = new StreamWriter(path)) Write(writer);
+            using (var writer = new StreamWriter(path))
+            {
+                foreach (var line in GetSourceLines())
+                    writer.WriteLine(line);
+            }
 #else
-            Console.Out.WriteLine($"{nameof(path)}: {path}");
-            Write(Console.Out);
-#endif
-        }
-
-
-        public void Write(TextWriter writer)
-        {
-            StringBuilder stringBuilder = new StringBuilder();
+            StringBuilder stringBuilder = new StringBuilder($"{nameof(path)}: {path}\n");
             foreach (var line in GetSourceLines())
                 stringBuilder.Append(line).Append('\n');
-            writer.WriteLine(stringBuilder);
+            Console.Out.WriteLine(stringBuilder);
+#endif
         }
     }
 }
