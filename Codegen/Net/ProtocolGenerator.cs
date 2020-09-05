@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -40,7 +41,7 @@ namespace Destr.Codegen
             Type writerAction = typeof(Action<,>).MakeGenericType(typeof(BinaryWriter), abstractPackage);
 
             Attributes.Add<Generated>();
-            var packageTypes = CodeGenerator.GetTypes()
+            var packageTypes = CodeGenerator.GetUsedTypes()
                 .Where(t => t.GetInterfaces()
                     .Where(i => i.IsGenericType)
                     .Where(i => i.GetGenericTypeDefinition() == typeof(IPacket<>))

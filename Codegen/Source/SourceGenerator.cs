@@ -249,7 +249,10 @@ namespace Destr.Codegen.Source
 
         public void Write(TextWriter writer)
         {
-            foreach (var line in GetSourceLines()) writer.WriteLine(line);
+            StringBuilder stringBuilder = new StringBuilder();
+            foreach (var line in GetSourceLines())
+                stringBuilder.Append(line).Append('\n');
+            writer.WriteLine(stringBuilder);
         }
     }
 }

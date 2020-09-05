@@ -42,7 +42,7 @@ namespace Assets.SerializerGenerator.Codegen.Net
             Type packetInterface = typeof(IPacket<>).MakeGenericType(protocol);
             Extends.Add(typeof(ICachedPacketReader<>).MakeGenericType(protocol));
             List<Type> packetTypeList = new List<Type>();
-            foreach (Type packetType in CodeGenerator.GetTypes())
+            foreach (Type packetType in CodeGenerator.GetUsedTypes())
             {
                 if (packetType.IsInterface || packetType.IsAbstract) continue;
                 Type packetGenericInterface = packetType.FindGenericInterface(typeof(IPacket<>));
