@@ -12,10 +12,26 @@ namespace Destr.Codegen
 {
     public class ProtocolSourceGenerator : ClassSourceGenerator
     {
-        private const string ReadingDescriptor = "_descriptorRead";
-        private const string WritingDescriptor = "_descriptorWrite";
+        private abstract class AnyProtocol : IProtocol<AnyProtocol>
+        {
+            public string Definition => throw new NotImplementedException();
 
-        public void Generate()
+            public IEnumerable<Type> GetPacketTypes()
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        //private const string ReadingDescriptor = "_descriptorRead";
+        //private const string WritingDescriptor = "_descriptorWrite";
+
+        [CodegenMethod]
+        public static void Generate()
+        {
+            new ProtocolSourceGenerator().MakeAll();
+        }
+
+        public void MakeAll()
         {
             foreach (Type type in CodeGenerator.GetTypes())
             {
@@ -52,8 +68,33 @@ namespace Destr.Codegen
 
             packageTypes.OrderBy(t => descriptionByType[t]);
 
-            Fields.AddLine($"public string Definition => \"{string.Join(";", packageTypes.Select(t => descriptionByType[t]))}\";");
+            List<Type> packetTypeList = new List<Type>();
+            foreach (Type packetType in CodeGenerator.GetUsedTypes())
+            {
+                if (packetType.IsInterface || packetType.IsAbstract) continue;
+                Type packetGenericInterface = packetType.FindGenericInterface(typeof(IPacket<>));
+                if (packetGenericInterface == null) continue;
+                if (packetGenericInterface.GetGenericArguments()[0] != type) continue;
+                packetTypeList.Add(packetType);
+            }
 
+            var packetTypesLines = Fields.Line;
+            packetTypesLines.Add("private static readonly ")
+                .Add<Type[]>()
+                .Add($" _packetTypes = {{ {string.Join(", ", packetTypeList.Select(t=> $"typeof({RealTypeName(t)})"))} }};");
+            packetTypesLines.Require(packetTypeList);
+
+            Fields.AddLine($"public string {nameof(AnyProtocol.Definition)} => \"{string.Join(";", packageTypes.Select(t => descriptionByType[t]))}\";");
+
+            Extends.Add(typeof(IProtocol<>), type);
+
+            var getPacketTypesMethod = AddMethod(nameof(AnyProtocol.GetPacketTypes)).Public;
+            getPacketTypesMethod.Return(typeof(IEnumerable<Type>));
+            getPacketTypesMethod.AddLine($"return _packetTypes;");
+
+            //private static readonly Type[] _packetTypes = { };
+
+            /*
             var staticConstructor = AddMethod(Name).Static;
             var constructor = AddMethod(Name).Public;
 
@@ -119,6 +160,7 @@ namespace Destr.Codegen
             Fields.Add($"private Action<BinaryReader>[] {ReadingDescriptor} = new Action<BinaryReader>[{fieldIndex}];");
             Fields.Line.Add($"private readonly object[] {WritingDescriptor} = new object[{fieldIndex}];");
             Fields.Line.Add($"delegate void writer<D>(BinaryWriter writer, in D data) where D : struct, IPacket<{Name}>;");
+            */
         }
     }
 }

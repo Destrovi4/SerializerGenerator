@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 
 
@@ -9,14 +10,15 @@ namespace Destr.Protocol
 
     public interface IProtocol<T> where T : IProtocol<T>
     {
-        ushort GetPacketId(Type packerType);
+        //ushort GetPacketId(Type packerType);
         string Definition { get; }
-        void Read(BinaryReader reader);
-        void Write<D>(BinaryWriter writer, in D data) where D : struct, IPacket<T>;
-        void Listen<D>(PacketListener<T, D> listener) where D : struct, IPacket<T>;
+        IEnumerable<Type> GetPacketTypes();
+        //void Read(BinaryReader reader);
+        //void Write<D>(BinaryWriter writer, in D data) where D : struct, IPacket<T>;
+        //void Listen<D>(PacketListener<T, D> listener) where D : struct, IPacket<T>;
     }
 
-
+    /*
     public static class ProtocolDefaults // Protocol => IProtocol
     {
         public static PacketListener<T, D> GetSender<T, D>(this T protocol) where D : struct, IPacket<T> where T : IProtocol<T>
@@ -33,4 +35,5 @@ namespace Destr.Protocol
             throw new Exception();
         }
     }
+    */
 }

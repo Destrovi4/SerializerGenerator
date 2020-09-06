@@ -38,6 +38,8 @@ namespace Destr.Codegen
                     foreach (Generated generated in generatedTypes)
                     {
                         Type serializer = generated?.Argument ?? baseSerializer;
+                        if (serializer == null)
+                            continue;
                         if (serializer.GetGenericTypeDefinition() != typeof(ISerializer<>))
                             continue;
                         Type dataType = serializer.GetGenericArguments()[0];
