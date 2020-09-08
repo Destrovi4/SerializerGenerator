@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
+using System.Runtime.Serialization.Formatters.Binary;
 using Destr.Codegen.Source;
 using Destr.IO;
 
@@ -144,7 +144,15 @@ namespace Destr.Codegen
                 Type fieldType = field.FieldType;
                 string fieldName = field.Name;
 
-                if (fieldType == typeof(byte))
+                if (fieldType.IsEnum)
+                {
+                    read.Line.Add($"value.{fieldName} = (")
+                        .Add(fieldType)
+                        .Add(")reader.ReadInt32();");
+                    write.Add($"writer.Write((int)value.{field.Name});");
+                    continue;
+                }
+                else if (fieldType == typeof(byte))
                     read.Add($"value.{fieldName} = reader.ReadByte();");
                 else if (fieldType == typeof(short))
                     read.Add($"value.{fieldName} = reader.ReadInt16();");
@@ -160,6 +168,20 @@ namespace Destr.Codegen
                     read.Add($"value.{fieldName} = reader.ReadBoolean();");
                 else if (fieldType == typeof(string))
                     read.Add($"value.{fieldName} = reader.ReadString();");
+                else if (!fieldType.IsValueType)
+                {
+                    // TODO WARNING AHTUNG
+
+                    read.Line.Add($"value.{fieldName} = (")
+                        .Add(fieldType)
+                        .Add(")new ")
+                        .Add<BinaryFormatter>()
+                        .Add("().Deserialize(reader.BaseStream);");
+                    write.Line.Add("new ")
+                        .Add<BinaryFormatter>()
+                        .Add($"().Serialize(writer.BaseStream, value.{fieldName});");
+                    continue;
+                }
                 else
                 {
                     if (!serializerFieldByType.TryGetValue(fieldType, out string serFieldName))
