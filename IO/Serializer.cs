@@ -77,7 +77,10 @@ namespace Destr.IO
 
         public static ISerializer<T> Get<T>() where T : struct
         {
-            return (ISerializer<T>)SerializerByType[typeof(T)];
+            Type type = typeof(T);
+            if (SerializerByType.TryGetValue(type, out object serializer))
+                return (ISerializer<T>)serializer;
+            throw new Exception($"Not found serizliser for {type}");
         }
 
         public static object Get(Type type)

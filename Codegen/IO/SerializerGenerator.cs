@@ -12,6 +12,24 @@ namespace Destr.Codegen
 {
     public class SerializerGenerator : ClassSourceGenerator
     {
+        private static readonly Dictionary<Type, string> ReadMethodByType = new Dictionary<Type, string>()
+        {
+            {typeof(bool), "ReadBoolean"},
+            {typeof(byte), "ReadByte"},
+            {typeof(char), "ReadChar"},
+            {typeof(decimal), "ReadDecimal"},
+            {typeof(double), "ReadDouble"},
+            {typeof(short), "ReadInt16"},
+            {typeof(int), "ReadInt32"},
+            {typeof(long), "ReadInt64"},
+            {typeof(sbyte), "ReadSByte"},
+            {typeof(float), "ReadSingle"},
+            {typeof(string), "ReadString"},
+            {typeof(ushort), "ReadUInt16"},
+            {typeof(uint), "ReadUInt32"},
+            {typeof(ulong), "ReadUInt64"}
+        };
+
         private struct GenerationTask
         {
             public string file;
@@ -143,31 +161,18 @@ namespace Destr.Codegen
             {
                 Type fieldType = field.FieldType;
                 string fieldName = field.Name;
-
                 if (fieldType.IsEnum)
                 {
                     read.Line.Add($"value.{fieldName} = (")
                         .Add(fieldType)
                         .Add(")reader.ReadInt32();");
                     write.Add($"writer.Write((int)value.{field.Name});");
-                    continue;
                 }
-                else if (fieldType == typeof(byte))
-                    read.Add($"value.{fieldName} = reader.ReadByte();");
-                else if (fieldType == typeof(short))
-                    read.Add($"value.{fieldName} = reader.ReadInt16();");
-                else if (fieldType == typeof(int))
-                    read.Add($"value.{fieldName} = reader.ReadInt32();");
-                else if (fieldType == typeof(long))
-                    read.Add($"value.{fieldName} = reader.ReadInt64();");
-                else if (fieldType == typeof(float))
-                    read.Add($"value.{fieldName} = reader.ReadSingle();");
-                else if (fieldType == typeof(double))
-                    read.Add($"value.{fieldName} = reader.ReadDouble();");
-                else if (fieldType == typeof(bool))
-                    read.Add($"value.{fieldName} = reader.ReadBoolean();");
-                else if (fieldType == typeof(string))
-                    read.Add($"value.{fieldName} = reader.ReadString();");
+                else if(ReadMethodByType.TryGetValue(fieldType, out string readerMethodName))
+                {
+                    read.Add($"value.{fieldName} = reader.{readerMethodName}();");
+                    write.Add($"writer.Write(value.{field.Name});");
+                }
                 else if (!fieldType.IsValueType)
                 {
                     // TODO WARNING AHTUNG
@@ -180,7 +185,6 @@ namespace Destr.Codegen
                     write.Line.Add("new ")
                         .Add<BinaryFormatter>()
                         .Add($"().Serialize(writer.BaseStream, value.{fieldName});");
-                    continue;
                 }
                 else
                 {
@@ -193,10 +197,7 @@ namespace Destr.Codegen
                     }
                     read.Line.Add($"{serFieldName}.Read(reader, out value.{fieldName});");
                     write.Line.Add($"{serFieldName}.Write(writer, in value.{fieldName});");
-                    continue;
                 }
-
-                write.Add($"writer.Write(value.{field.Name});");
             }
         }
 
