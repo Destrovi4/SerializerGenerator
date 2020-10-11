@@ -13,6 +13,7 @@ namespace Destr.IO
     public static class Serializer
     {
         private static readonly Dictionary<Type, object> SerializerByType = new Dictionary<Type, object>();
+        private static readonly Dictionary<Type, ISerializer> _genericSerializerByType = new Dictionary<Type, ISerializer>();
 
         private static readonly HashSet<Assembly> AssemblyList = new HashSet<Assembly>();
 
@@ -80,13 +81,36 @@ namespace Destr.IO
             Type type = typeof(T);
             if (SerializerByType.TryGetValue(type, out object serializer))
                 return (ISerializer<T>)serializer;
-            throw new Exception($"Not found serizliser for {type}");
+
+            var genericSerializer = new GenericSerializer<T>();
+            _genericSerializerByType.Add(type, genericSerializer);
+            SerializerByType.Add(type, genericSerializer);
+            return genericSerializer;
         }
 
-        public static object Get(Type type)
+        private static ISerializer<T> GetGeneric<T>() where T : struct
         {
-            return SerializerByType.TryGetValue(type, out var serializer) ? serializer : null;
+            return Get<T>();
         }
+
+        public static ISerializer Get(Type dataType)
+        {
+            if(_genericSerializerByType.TryGetValue(dataType, out ISerializer storedSerializer))
+                return storedSerializer;
+            MethodInfo genericMethod = typeof(Serializer).GetMethod(nameof(Serializer.GetGeneric)).MakeGenericMethod(dataType);
+            object serializer = genericMethod.Invoke(null, null);
+            if(!(serializer is ISerializer))
+                throw new Exception();
+
+            return (ISerializer)serializer;
+        }
+
+        /*
+         MethodInfo methodInfo = typeof(EcsSystems).GetMethod("OneFrame");
+            if (methodInfo == null) throw new NullReferenceException($"No {method} method in {type.FullName}");
+            MethodInfo genericMethod = methodInfo.MakeGenericMethod(generic);
+            genericMethod.Invoke(context, parameters);
+        */
 
         internal static string Definition(Type type)
         {
